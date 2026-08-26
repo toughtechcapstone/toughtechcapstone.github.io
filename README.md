@@ -1,4 +1,4 @@
-# toughtech.github.io
+# toughtechcapstone.github.io
 
 Public course site for **MGMT 274A/B — Tough Tech Commercialization**, the second-year
 deep tech capstone at UCLA Anderson (Prof. Jane Wu).
