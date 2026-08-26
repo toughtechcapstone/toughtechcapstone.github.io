@@ -1,0 +1,85 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//UCLA Anderson//MGMT 274A Tough Tech//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:MGMT 274A Tough Tech Commercialization (Fall 2026)
+X-WR-TIMEZONE:America/Los_Angeles
+BEGIN:VTIMEZONE
+TZID:America/Los_Angeles
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0800
+TZOFFSETTO:-0700
+TZNAME:PDT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0700
+TZOFFSETTO:-0800
+TZNAME:PST
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:mgmt274a-20260930@toughtechcapstone.github.io
+DTSTAMP:20260826T000000Z
+DTSTART;TZID=America/Los_Angeles:20260930T090000
+DTEND;TZID=America/Los_Angeles:20260930T112000
+SUMMARY:MGMT 274A S1: The Corridor and the Craft
+DESCRIPTION:Guest: Mark Wisniewski\, UCLA TDG. Adopt-a-Company draft\; invention-team matching launches. Details: https://toughtechcapstone.github.io/#schedule
+LOCATION:Entrepreneurs Hall C315\, UCLA Anderson
+URL:https://toughtechcapstone.github.io/
+END:VEVENT
+BEGIN:VEVENT
+UID:mgmt274a-20261014@toughtechcapstone.github.io
+DTSTAMP:20260826T000000Z
+DTSTART;TZID=America/Los_Angeles:20261014T090000
+DTEND;TZID=America/Los_Angeles:20261014T112000
+SUMMARY:MGMT 274A S2: Technology Risk — Roadmaps and Figures of Merit
+DESCRIPTION:Lab visit: Li Lab (ChargeIQ). Living Brief #1\; Verification Bounty #1. Details: https://toughtechcapstone.github.io/#schedule
+LOCATION:Entrepreneurs Hall C315\, UCLA Anderson
+URL:https://toughtechcapstone.github.io/
+END:VEVENT
+BEGIN:VEVENT
+UID:mgmt274a-20261028@toughtechcapstone.github.io
+DTSTAMP:20260826T000000Z
+DTSTART;TZID=America/Los_Angeles:20261028T090000
+DTEND;TZID=America/Los_Angeles:20261028T112000
+SUMMARY:MGMT 274A S3: Market Risk — Evidence in Markets That Don't Exist Yet
+DESCRIPTION:Living Brief #2\; Verification Bounty #2. Details: https://toughtechcapstone.github.io/#schedule
+LOCATION:Entrepreneurs Hall C315\, UCLA Anderson
+URL:https://toughtechcapstone.github.io/
+END:VEVENT
+BEGIN:VEVENT
+UID:mgmt274a-20261118@toughtechcapstone.github.io
+DTSTAMP:20260826T000000Z
+DTSTART;TZID=America/Los_Angeles:20261118T090000
+DTEND;TZID=America/Los_Angeles:20261118T112000
+SUMMARY:MGMT 274A S4: The Government Customer
+DESCRIPTION:Guest: defense/dual-use practitioner. AI contracting-officer simulation. Details: https://toughtechcapstone.github.io/#schedule
+LOCATION:Entrepreneurs Hall C315\, UCLA Anderson
+URL:https://toughtechcapstone.github.io/
+END:VEVENT
+BEGIN:VEVENT
+UID:mgmt274a-20261202@toughtechcapstone.github.io
+DTSTAMP:20260826T000000Z
+DTSTART;TZID=America/Los_Angeles:20261202T090000
+DTEND;TZID=America/Los_Angeles:20261202T112000
+SUMMARY:MGMT 274A S5: Financing Risk — Milestones to Money
+DESCRIPTION:Guest: deep tech investor. Verification Bounty #3. Details: https://toughtechcapstone.github.io/#schedule
+LOCATION:Entrepreneurs Hall C315\, UCLA Anderson
+URL:https://toughtechcapstone.github.io/
+END:VEVENT
+BEGIN:VEVENT
+UID:mgmt274a-20261209@toughtechcapstone.github.io
+DTSTAMP:20260826T000000Z
+DTSTART;TZID=America/Los_Angeles:20261209T090000
+DTEND;TZID=America/Los_Angeles:20261209T112000
+SUMMARY:MGMT 274A S6: Mid-Project Reviews
+DESCRIPTION:Phase 1 presentations (5–7 min per team) with peer feedback\; guest reactor from the bench. Details: https://toughtechcapstone.github.io/#schedule
+LOCATION:Entrepreneurs Hall C315\, UCLA Anderson
+URL:https://toughtechcapstone.github.io/
+END:VEVENT
+END:VCALENDAR
