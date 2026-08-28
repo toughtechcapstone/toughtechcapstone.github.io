@@ -109,6 +109,8 @@ main h3 {
 .issue-head h2 {
   border: 0; padding: 0; margin: 0; font-size: 17px; letter-spacing: 0.08em;
 }
+.issue-head h2 a { color: inherit; }
+.issue-head h2 a:hover { color: var(--accent); text-decoration: none; }
 .issue-date {
   font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--muted); margin: 0 0 22px;

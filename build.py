@@ -236,7 +236,7 @@ def build(conf, issues, outdir=None):
          f'    <p class="masthead-note">A weekly roundup of what the MGMT 274A/B cohort is reading in deep tech &mdash; and what is happening in the LA hard tech corridor. Written by the class, one forwarded email at a time. <a href="submit.html">Send us something.</a></p>']
     if latest:
         c.append('    <div class="issue-head">')
-        c.append(f'      <h2>Issue {latest["n"]}</h2>')
+        c.append(f'      <h2><a href="{latest["slug"]}">Issue {latest["n"]}</a></h2>')
         c.append(f'      <p class="issue-date">{pretty(latest["published"])} &middot; {len(latest["items"])} link{"s" if len(latest["items"]) != 1 else ""}</p>')
         c.append('    </div>')
         c.append(render_items(latest["items"]))
