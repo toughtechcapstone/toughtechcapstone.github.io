@@ -94,6 +94,32 @@ def norm_url(u):
                                     urllib.parse.urlencode(q), ""))
 
 
+TRACKING = ("utm_", "fbclid", "gclid", "mc_cid", "mc_eid", "igshid", "_bhlid",
+            "ref_src", "source", "triedsigningin")
+
+
+def clean_url(u):
+    """Drop tracking parameters, keeping everything else about the URL intact."""
+    try:
+        p = urllib.parse.urlsplit(u)
+    except ValueError:
+        return u
+    q = [(k, v) for k, v in urllib.parse.parse_qsl(p.query, keep_blank_values=True)
+         if not any(k.lower().startswith(t) for t in TRACKING)]
+    return urllib.parse.urlunsplit((p.scheme, p.netloc, p.path,
+                                    urllib.parse.urlencode(q), p.fragment))
+
+
+def tidy_name(raw):
+    """First name only. Handles directory-style "Wu, Jane" and stray punctuation."""
+    n = (raw or "").replace('"', "").replace("'", "").strip()
+    if "," in n:                       # "Wu, Jane" -> "Jane"
+        after = n.split(",", 1)[1].strip()
+        n = after or n.split(",", 1)[0]
+    n = re.split(r"[\s.]+", n.strip())[0] if n.strip() else ""
+    return re.sub(r"[^A-Za-zÀ-ɏ'\-]", "", n)[:40]
+
+
 def fetch_title(url):
     try:
         req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -114,6 +140,7 @@ def clean(rows, terms, do_fetch=True):
         url = row.get("url") or row.get("link") or ""
         if not re.match(r"^https?://", url, re.I):
             continue
+        url = clean_url(url)
         status = (row.get("status") or "").lower()
         if status in ("held", "removed", "hidden", "spam"):
             held += 1
@@ -133,7 +160,7 @@ def clean(rows, terms, do_fetch=True):
         if ts is None:
             continue
         name = (row.get("name") or row.get("first name") or "").strip()
-        name = re.split(r"[\s,]+", name)[0][:40] if name else ""
+        name = tidy_name(name)
         tag = (row.get("tag") or "").strip().lower()
         local = "socal" in tag or "local" in tag or "socal" in note.lower()
         if not title and do_fetch:

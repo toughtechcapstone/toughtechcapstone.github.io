@@ -125,8 +125,7 @@ function parseMessage_(msg) {
   }
 
   const note = extractNote_(body, url);
-  const displayName = (from.split('<')[0] || '').replace(/["']/g, '').trim();
-  const firstName = (displayName || addr.split('@')[0]).split(/[\s.]+/)[0];
+  const firstName = firstName_(from.split('<')[0] || '', addr);
   const tag = /\bsocal\b|\bel segundo\b|\blos angeles\b|\blocal\b/i.test(note) ? 'socal' : '';
 
   return [
@@ -139,6 +138,21 @@ function parseMessage_(msg) {
     status,
     addr,      // private; the "queue" tab omits this column
   ];
+}
+
+/**
+ * First name only. UCLA directory display names arrive as "Wu, Jane", so a plain
+ * split on whitespace would publish the surname.
+ */
+function firstName_(displayName, addr) {
+  let n = (displayName || '').replace(/["']/g, '').trim();
+  if (n.indexOf(',') > -1) {
+    const after = n.split(',')[1];
+    n = (after && after.trim()) ? after.trim() : n.split(',')[0];
+  }
+  if (!n) n = addr.split('@')[0];
+  n = n.trim().split(/[\s.]+/)[0];
+  return n.replace(/[^A-Za-zÀ-ɏ'\-]/g, '');
 }
 
 /** First real link in the body, skipping list-management and tracking URLs. */
