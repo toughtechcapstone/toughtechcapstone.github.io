@@ -1,92 +1,100 @@
-# Setup — one time, about 20 minutes
+# Setup
 
-Do these in order. Steps 1–4 are yours (they need your Google login); step 5 is a
-two-line edit anyone can make.
+The submissions inbox is **toughtechcapstone@gmail.com**. What follows wires it to
+the site. About ten minutes, all of it in the browser.
 
-## 1. Create the submissions inbox
+Do every step while signed in as **toughtechcapstone@gmail.com**, not your Anderson
+account. The script reads and archives everything in whichever inbox it is attached to.
 
-Make a Gmail account for the newsletter, e.g. `toughtechweekly@gmail.com`.
-Use a fresh account rather than your Anderson address — the script reads and
-archives everything in the inbox, and you do not want that pointed at your own mail.
+## 1. Create the Apps Script project
 
-## 2. Create the sheet
+1. Go to <https://script.google.com> and click **New project**.
+2. Rename it *Tough Tech Weekly intake* (click "Untitled project" at the top).
+3. Delete the few lines of starter code in the editor.
+4. Open [`apps-script/Code.gs`](apps-script/Code.gs) in this repo, copy the whole
+   file, and paste it in. Save (⌘S).
 
-New Google Sheet, name it *Tough Tech Weekly submissions*. Make **two tabs**:
+## 2. Run setup()
 
-**Tab `inbox`** — row 1 headers, exactly:
+In the toolbar there is a function dropdown. Choose **setup** and click **Run**.
 
-```
-timestamp | name | url | title | note | tag | status | email
-```
+Google will ask for permission the first time. It shows an "unverified app" warning
+because the script is yours and unpublished, which is expected: click **Advanced**,
+then **Go to Tough Tech Weekly intake (unsafe)**, then **Allow**. It is asking for
+Gmail and Sheets access because it reads the inbox and writes the spreadsheet.
 
-**Tab `queue`** — cell A1 only:
+When it finishes, the execution log at the bottom prints a link to a new spreadsheet
+called *Tough Tech Weekly submissions*. It has two tabs, already set up:
 
-```
-=QUERY(inbox!A:H, "select A,B,C,D,E,F,G", 1)
-```
+- **inbox** — every submission, including the sender's email address
+- **queue** — the same thing without the email column, which is what gets published
 
-This mirrors `inbox` without column H, so student email addresses never reach the
-public CSV.
+## 3. Run installTrigger()
 
-Then **File ▸ Share ▸ Publish to web** → select the **`queue`** tab → **CSV** →
-Publish. Copy the URL it gives you.
+Choose **installTrigger** from the same dropdown and click **Run**. The script now
+checks the inbox every five minutes on its own.
 
-Grab the spreadsheet ID from the address bar too — it is the long string between
-`/d/` and `/edit`.
+## 4. Publish the queue tab
 
-## 3. Wire up the Gmail intake
+Open the spreadsheet from step 2, then:
 
-Signed in as the *newsletter* Gmail account:
+**File ▸ Share ▸ Publish to web** → in the first dropdown pick the **queue** tab (not
+"Entire document") → in the second pick **Comma-separated values (.csv)** → click
+**Publish** → copy the URL it gives you.
 
-1. Go to <https://script.google.com> → **New project**, name it *Tough Tech Weekly intake*.
-2. Delete the starter code, paste in all of [`apps-script/Code.gs`](apps-script/Code.gs).
-3. Set `SHEET_ID` at the top to the ID from step 2.
-4. Run `processInbox` once from the editor. Google will ask you to authorize Gmail
-   and Sheets access — approve it. (You will see an "unverified app" warning because
-   the script is yours and unpublished; **Advanced ▸ Go to project** is the way through.)
-5. Run `installTrigger` once. It now polls every five minutes.
+That URL is unlisted but public, which is why the email column is not in it.
 
-Test it: forward something from your Anderson address, wait five minutes, confirm a
-row appears in `inbox`. Then send one from a non-UCLA address and confirm nothing
-appears.
+## 5. Paste the URL into config.json
 
-## 4. Optional: the Google Form
-
-New form, three questions — *Link* (short answer), *Why is this interesting?*
-(paragraph, optional), *Is this SoCal / corridor news?* (checkbox).
-Under Settings, **restrict to users in UCLA**, and set responses to go to the same
-spreadsheet. Rename the response tab's columns to match the `inbox` headers, or add
-a `=QUERY` in `inbox` pulling from it — either works, since the build only ever reads
-`queue`.
-
-If you skip the form, the site simply does not mention it.
-
-## 5. Point the site at everything
-
-Edit [`config.json`](config.json):
+Edit [`config.json`](config.json) and put the URL in `sheet_csv_url`:
 
 ```json
 {
   "site": "https://toughtechcapstone.github.io/",
-  "email": "toughtechweekly@gmail.com",
+  "email": "toughtechcapstone@gmail.com",
   "form_url": "",
-  "sheet_csv_url": "PASTE THE PUBLISHED CSV URL FROM STEP 2"
+  "sheet_csv_url": "PASTE IT HERE",
+  "fallback_email": "jane.wu@anderson.ucla.edu"
 }
 ```
 
-Commit and push. The GitHub Action rebuilds on that push, and then automatically
+Commit and push. Pushing rebuilds the site, and after that it rebuilds on its own
 every Tuesday and Friday at 8 AM Pacific.
+
+## 6. Test it
+
+Forward something to toughtechcapstone@gmail.com from your Anderson address, with a
+sentence of your own above the forward. Within five minutes a row should appear in
+the **inbox** tab. Then send one from a non-UCLA address and check that nothing
+appears, which confirms the filter works.
+
+To see it on the site without waiting for Friday: in the repo, **Actions ▸ Build
+newsletter ▸ Run workflow**.
+
+## Optional: the Google Form
+
+Some people would rather tap a form than forward mail. Create one with three
+questions: *Link* (short answer), *Why is this interesting?* (paragraph, optional),
+and *Is this SoCal / corridor news?* (checkbox). In Settings, restrict it to users in
+UCLA, and send responses to the same spreadsheet. Then put the form's URL in
+`form_url` in config.json.
+
+If you skip this, the site simply does not mention a form.
 
 ## Running it during the term
 
-- **Publish early:** Actions ▸ *Build newsletter* ▸ Run workflow.
-- **Take something down:** set that row's `status` to `held` in the `inbox` tab, or
+- **Publish early:** Actions ▸ Build newsletter ▸ Run workflow.
+- **Take something down:** set that row's `status` to `held` in the **inbox** tab, or
   delete the row. It disappears on the next build.
-- **Hold a term permanently:** add it to `data/blocklist.txt`.
-- **Fix a title:** fill in the `title` column and the build stops fetching its own.
+- **Block a term for good:** add it to `data/blocklist.txt`.
+- **Fix a bad title:** type one into the `title` column and the build stops fetching
+  its own.
+- **Check on the script:** script.google.com ▸ your project ▸ **Executions** shows
+  every run and anything it logged.
 
 ## What to tell students
 
-> Forward anything interesting in deep tech to **toughtechweekly@gmail.com** from
-> your UCLA address. Type a sentence or two above the forward if you want to say why
-> it matters — that runs with your name on it. It publishes Friday. Nobody screens it.
+> Forward anything interesting in deep tech to **toughtechcapstone@gmail.com** from
+> your UCLA address. Add a sentence above the forward if you want to say why it
+> matters, and it runs with your first name on it. It publishes Friday. Nobody
+> screens it.
