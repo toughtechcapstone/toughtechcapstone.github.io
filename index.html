@@ -3,352 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tough Tech Commercialization — UCLA Anderson</title>
-  <meta name="description" content="MGMT 274A/B, the second-year deep tech capstone at UCLA Anderson. MBA students serve as business co-founders for real inventions from UCLA labs and LA's hard tech corridor.">
-  <meta property="og:title" content="Tough Tech Commercialization — UCLA Anderson">
-  <meta property="og:description" content="Lab to market in LA's hard tech cluster. A two-quarter MBA capstone taught by Jane Wu.">
+  <title>Tough Tech Weekly — UCLA Anderson</title>
+  <meta name="description" content="A weekly roundup of deep tech and LA hard tech corridor news, assembled by the MGMT 274A/B cohort at UCLA Anderson.">
+  <meta property="og:title" content="Tough Tech Weekly — UCLA Anderson">
+  <meta property="og:description" content="A weekly roundup of deep tech and LA hard tech corridor news, assembled by the MGMT 274A/B cohort at UCLA Anderson.">
   <meta property="og:url" content="https://toughtechcapstone.github.io/">
-  <meta property="og:image" content="https://toughtechcapstone.github.io/corridor-class.jpg">
-<style>
-  :root {
-    --ground: #ffffff;
-    --ink: #333333;
-    --soft: #666666;
-    --muted: #999999;
-    --accent: #2a7ab0;
-    --hairline: #eeeeee;
-    --tint: #f7f9fb;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --ground: #15181b;
-      --ink: #d6d9dc;
-      --soft: #a5abb1;
-      --muted: #7c848b;
-      --accent: #6cabd8;
-      --hairline: #2a2f34;
-      --tint: #1b1f23;
-    }
-  }
-  :root[data-theme="dark"] {
-    --ground: #15181b;
-    --ink: #d6d9dc;
-    --soft: #a5abb1;
-    --muted: #7c848b;
-    --accent: #6cabd8;
-    --hairline: #2a2f34;
-    --tint: #1b1f23;
-  }
-
-  body {
-    background: var(--ground);
-    color: var(--ink);
-    font-family: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 15px;
-    line-height: 1.65;
-    margin: 0;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrapper {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 55px 30px 60px;
-    display: flex;
-    gap: 60px;
-    align-items: flex-start;
-  }
-  html { scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-  main h2 { scroll-margin-top: 20px; }
-
-  a { color: var(--accent); text-decoration: none; }
-  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
-  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
-  p { margin: 0 0 14px; }
-  ul, ol { margin: 0 0 14px; padding-left: 22px; }
-  li { margin-bottom: 6px; }
-
-  /* ---------- sidebar ---------- */
-  aside { width: 235px; flex-shrink: 0; position: sticky; top: 55px; }
-  aside .eyebrow {
-    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--muted); margin: 0 0 6px;
-  }
-  aside h1 {
-    font-size: 24px; font-weight: 600; letter-spacing: -0.01em;
-    line-height: 1.2; margin: 0 0 6px; color: var(--ink);
-  }
-  aside .role { color: var(--soft); margin-bottom: 18px; }
-  aside .contact {
-    font-size: 13.5px; color: var(--muted); line-height: 1.7; margin-bottom: 18px;
-  }
-  aside .contact a { color: var(--soft); }
-  aside .contact strong { color: var(--soft); font-weight: 500; }
-  aside nav {
-    border-top: 1px solid var(--hairline); padding-top: 16px;
-    display: flex; flex-direction: column; gap: 7px; font-size: 14px;
-  }
-  aside nav .nav-sep { margin-top: 9px; padding-top: 12px; border-top: 1px solid var(--hairline); }
-
-  /* ---------- content ---------- */
-  main { flex: 1; min-width: 0; max-width: 620px; }
-  main h2 {
-    font-size: 19px; font-weight: 600; letter-spacing: -0.01em;
-    color: var(--ink); margin: 40px 0 14px;
-  }
-  main h2:first-child { margin-top: 0; }
-  main h3 { font-size: 15px; font-weight: 600; margin: 22px 0 6px; }
-  .lede { font-size: 16.5px; color: var(--ink); }
-  .note { font-size: 13px; color: var(--muted); }
-  .status {
-    display: inline-block; font-size: 12.5px; color: var(--soft);
-    border: 1px solid var(--hairline); border-radius: 3px; padding: 1px 8px; margin-bottom: 16px;
-  }
-
-  .hero {
-    width: 100%; height: auto; border-radius: 4px; display: block; margin: 6px 0 22px;
-  }
-
-  /* principles */
-  ol.principles { list-style: none; padding: 0; counter-reset: p; }
-  ol.principles li {
-    counter-increment: p; position: relative; padding-left: 34px; margin-bottom: 14px;
-  }
-  ol.principles li::before {
-    content: counter(p); position: absolute; left: 0; top: 2px;
-    width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--hairline);
-    font-size: 12px; color: var(--muted); text-align: center; line-height: 22px;
-  }
-  ol.principles strong { display: block; color: var(--ink); font-weight: 600; }
-  ol.principles span { color: var(--soft); font-size: 14.5px; }
-
-  /* risk grid */
-  .risks { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 12px 0 18px; }
-  .risks div { background: var(--tint); border-radius: 4px; padding: 12px 14px; font-size: 13.5px; color: var(--soft); }
-  .risks div strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 3px; }
-
-  /* tables */
-  .tablewrap { overflow-x: auto; margin: 8px 0 18px; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td { text-align: left; vertical-align: top; padding: 9px 10px; border-bottom: 1px solid var(--hairline); }
-  th { font-weight: 600; color: var(--soft); font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; }
-  td.num { width: 34px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  td.pct { width: 60px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  tr.group td { color: var(--muted); font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; padding-top: 14px; }
-  tr.total td { font-weight: 600; }
-  td .t { color: var(--ink); font-weight: 600; }
-  td .d { color: var(--muted); font-size: 12.5px; display: block; }
-  td .m { color: var(--soft); font-size: 13.5px; }
-  tr.milestone td { color: var(--muted); font-size: 13px; font-style: italic; }
-
-  details { margin: 4px 0 10px; }
-  summary { cursor: pointer; font-size: 13.5px; color: var(--accent); }
-  details p, details ul { font-size: 14px; color: var(--soft); margin-top: 8px; }
-
-  blockquote {
-    margin: 14px 0; padding: 10px 16px; border-left: 2px solid var(--accent);
-    background: var(--tint); font-size: 14.5px; color: var(--soft); border-radius: 0 4px 4px 0;
-  }
-
-  footer {
-    margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--hairline);
-    font-size: 12.5px; color: var(--muted);
-  }
-  footer a { color: var(--muted); text-decoration: underline; text-decoration-color: var(--hairline); text-underline-offset: 3px; }
-
-  @media (max-width: 720px) {
-    .wrapper { flex-direction: column; gap: 30px; padding: 35px 22px 50px; }
-    aside { position: static; width: auto; }
-    aside nav { flex-direction: row; flex-wrap: wrap; gap: 6px 18px; }
-    aside nav .nav-sep { margin-top: 0; padding-top: 0; border-top: none; }
-  }
-</style>
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="alternate" type="application/rss+xml" title="Tough Tech Weekly" href="https://toughtechcapstone.github.io/feed.xml">
 </head>
 <body>
 <div class="wrapper">
   <aside>
     <p class="eyebrow">MGMT 274A/B &middot; UCLA Anderson</p>
-    <h1>Tough Tech Commercialization</h1>
-    <p class="role">Lab to market in LA&rsquo;s hard tech cluster</p>
-    <p class="contact">
-      <strong>Prof. Jane Wu</strong><br>
-      <a href="mailto:jane.wu@anderson.ucla.edu">jane.wu (a) anderson.ucla.edu</a><br>
-      Wednesdays 9:00&ndash;11:20 AM<br>
-      Entrepreneurs Hall C315<br>
-      Office hours Wed 11&ndash;12, online
-    </p>
+    <h1><a href="index.html" style="color:inherit">Tough Tech Weekly</a></h1>
+    <p class="role">What the cohort is reading &mdash; deep tech, and the LA corridor</p>
     <nav>
-      <a href="#about">About the course</a>
-      <a href="#how">How it&rsquo;s taught</a>
-      <a href="#corridor">The Corridor</a>
-      <a href="#schedule">Schedule</a>
-      <a href="mgmt274-fall-2026.ics" download>Add Fall dates to calendar (.ics)</a>
-      <a href="#deliverables">Deliverables &amp; grading</a>
-      <a href="#ai">AI policy</a>
-      <a href="#team">Teaching team</a>
-      <a class="nav-sep" href="https://bruinlearn.ucla.edu/">Bruin Learn</a>
+      <a href="index.html">Latest issue</a>
+      <a href="index.html#archive">Archive</a>
+      <a href="submit.html">Submit a link</a>
+      <a href="reminders.html">Course reminders</a>
+      <a class="nav-sep" href="https://toughtechcapstone.github.io/feed.xml">RSS</a>
+      <a href="https://bruinlearn.ucla.edu/">Bruin Learn</a>
       <a href="https://wujane.github.io/">Jane Wu</a>
     </nav>
   </aside>
-
   <main>
-    <h2 id="about">About the course</h2>
-    <span class="status">AY 2026&ndash;27 &middot; Fall &amp; Winter &middot; 2nd-year MBA &middot; max 20 students</span>
-    <p class="lede">Inside UCLA labs and across the Southern California ecosystem, breakthrough technologies are waiting &mdash; with the potential to address problems in energy, space, defense, food security, advanced materials, and beyond. The hard part is not the discovery; it is the passage from lab to market.</p>
-    <p>In this two-quarter capstone you make that leap yourself. You serve as the <strong>business co-founder for a real invention</strong>, working alongside a technical team &mdash; PIs, postdocs, engineers, your &ldquo;innovation co-founders&rdquo; &mdash; to move it toward the world. You identify the venture&rsquo;s binding constraint among five core risk areas, then go de-risk it with real evidence.</p>
-    <div class="risks">
-      <div><strong>Technology</strong>Can the science or engineering be made to work reliably?</div>
-      <div><strong>Market</strong>Who adopts, how big, willingness to pay, what drives the purchase?</div>
-      <div><strong>Regulatory</strong>Which rules, approvals, and policies govern adoption?</div>
-      <div><strong>Scale</strong>Can it move from prototype to manufacturing and deployment?</div>
-      <div><strong>Financing</strong>Can funding be secured when VC timelines and grants don&rsquo;t match the path?</div>
-    </div>
-    <p>You do not need to be a scientist or engineer to excel here. You do need to be willing to get technical enough to be dangerous, to put your name on your numbers, and to be judged by practitioners.</p>
-    <img class="hero" src="corridor-class.jpg" alt="Tough Tech: SoCal has a history of being a trailblazer on big ambitious problems. Time to build for hard problems.">
-    <details>
-      <summary>Units, prerequisites, and grading basis</summary>
-      <p><strong>274A (Fall, 4 units)</strong> &mdash; Lectures and fieldwork, three hours. In Progress grading; credit given on completion of 274B. Expect at least one hour per week of team meetings outside class.<br>
-      <strong>274B (Winter, 4 units)</strong> &mdash; Fieldwork, board-style reviews, and feedback sessions, three hours. Requisite: 274A. Letter grading.</p>
-      <p>No course prerequisites. Enrollment is limited to second-year full-time Anderson MBA students admitted to the course. There is no course reader and no casepack &mdash; required purchases: none.</p>
-    </details>
-    <details>
-      <summary>Career paths the capstone accelerates</summary>
-      <ul>
-        <li><strong>Technology investment (VC, PE, CVC)</strong> &mdash; evaluate early-stage technologies with the verification habits investors increasingly screen for.</li>
-        <li><strong>Corporate innovation</strong> &mdash; bridge scientific research teams and business units.</li>
-        <li><strong>Startups</strong> &mdash; be the business co-founder of a deep tech startup; some students continue with their capstone team.</li>
-        <li><strong>Hard tech operators and dual-use innovation</strong> &mdash; chief of staff, BD, GTM, and program roles across the corridor.</li>
-      </ul>
-    </details>
-
-    <h2 id="how">How this course is taught</h2>
-    <p>General knowledge and polished analysis are now cheap: any frontier model can produce a competent market sizing, a clean financial model, a plausible strategy memo. What remains scarce &mdash; and what this capstone exists to build &mdash; is the <em>last mile</em>: taste, verification, and judgment. (See Joel Podolny, <a href="https://www.honor.education/">&ldquo;The Last Mile Problem of Professional Development.&rdquo;</a>)</p>
-    <ol class="principles">
-      <li><strong>The last mile is the course.</strong><span>When AI can produce the artifact, the artifact stops signaling the thinking. So this course grades the thinking: the quality of your reasoning, the truth behind your numbers, and the questions you know to ask.</span></li>
-      <li><strong>Depth from variety: the bench.</strong><span>Judgment is absorbed the way residents absorb clinical judgment &mdash; many brief, high-intensity encounters with experienced practitioners, each anchored to a live decision. A rotating bench of founders, investors, PIs, and operators joins us all year.</span></li>
-      <li><strong>No casepack: Living Briefs.</strong><span>Most weeks you receive a short, AI-assembled dossier on a real decision facing a real company right now, built from primary sources: contract awards, regulatory dockets, patents, technical papers, hiring data, trade press. Fresher than any case, free, and &mdash; by design &mdash; imperfect.</span></li>
-      <li><strong>Verification is a graded sport.</strong><span>Every Living Brief contains seeded flaws: a wrong unit, a misapplied metric, a fabricated citation, a plausible-but-false claim. Class opens with the Verification Bounty. Catches score; confident false accusations lose points.</span></li>
-      <li><strong>The signature standard.</strong><span>Every graded deliverable ends with a signature block. At the final Board Meeting, judges pick any number on any slide and you have sixty seconds to give its provenance.</span></li>
-    </ol>
-    <blockquote>&ldquo;We stand behind every claim in this document. Where we could not verify, we have said so.&rdquo; &mdash; And note: &ldquo;we recommend against proceeding&rdquo; is a fully legitimate, fully gradeable conclusion. Evidence that kills a path cleanly is worth more than optimism that survives no contact with reality.</blockquote>
-
-    <h2 id="corridor">The Corridor: our second classroom</h2>
-    <p>El Segundo has quietly become the country&rsquo;s most important address for building physical things again &mdash; the highest density of machine shops in the U.S., legacy anchors (SpaceX in Hawthorne; Northrop Grumman, The Aerospace Corporation, and Space Systems Command at Los Angeles Air Force Base), and a wave of young companies across defense, space, energy, and climate. The class engages this ecosystem four ways.</p>
-    <h3>Adopt-a-Company <span class="note">(all year)</span></h3>
-    <p>In Week 1 you draft one corridor company and track it all year &mdash; funding rounds, contract awards, test campaigns, launches, stumbles. When your company makes news, you open class with a 90-second situation report. The roster refreshes each fall and draws from companies such as Radiant, Varda Space, Impulse Space, Neros, Castelion, CX2, Senra Systems, Amca, Durin, Rainmaker, Valar Atomics, Apex, Arc, Hadrian, and Terraform Industries; Long Beach&rsquo;s Rocket Lab, Relativity Space, and Vast; and the climate portfolio around LACI and the Port of Los Angeles.</p>
-    <h3>Corridor Day <span class="note">(Session 7)</span></h3>
-    <p>A field session inside two to three corridor companies, ending with a founders&rsquo; panel over lunch. You will stand on factory floors that did not exist three years ago.</p>
-    <h3>The corridor bench</h3>
-    <p>Guests, Phase 2 expert consultations, and final-round judges are drawn substantially from corridor founders, investors, and operators &mdash; so the standards you are graded against are the standards of the community you may join.</p>
-    <h3>The Corridor Census <span class="note">(public, class-authored)</span></h3>
-    <p>Each student&rsquo;s adopted-company profile &mdash; rigorously sourced, verified, signed &mdash; is compiled into a public annual report on the LA hard tech corridor, published with the class listed as authors and launched at the final Board Meeting. Proof that you can produce signed, verified analysis about the most exciting industrial story in America &mdash; because you were there.</p>
-
-    <h2 id="schedule">Schedule</h2>
-    <p class="note">Sessions meet Wednesdays 9:00&ndash;11:20 AM in Entrepreneurs Hall C315 unless flagged. Fall dates are set (<a href="mgmt274-fall-2026.ics" download>download the .ics</a>); Winter dates are pending the UCLA academic calendar. Living Briefs and anchor readings (all free links) post to Bruin Learn the Friday before class.</p>
-
-    <h3>Fall 2026 &mdash; MGMT 274A</h3>
-    <div class="tablewrap">
-    <table>
-      <thead><tr><th>#</th><th>Session</th><th>Prepare</th></tr></thead>
-      <tbody>
-        <tr><td class="num">1</td><td><span class="t">The Corridor and the Craft</span><span class="d">Wed Sep 30 &middot; Guest: Mark Wisniewski, UCLA Technology Development Group</span><span class="m">Why atoms are hard now; the five-risk map; how this course works. Adopt-a-Company draft. Invention&ndash;team matching launches. Calibration rep: rank three anonymized deep tech one-pagers against how investors actually ranked them.</span></td><td><span class="m">Podolny, &ldquo;The Last Mile Problem&rdquo;; The Engine, <em>Tough Tech Landscape</em>; BVP XB100; a16z Big Ideas.</span></td></tr>
-        <tr class="milestone"><td></td><td colspan="2">Milestone: TL-TR baseline survey</td></tr>
-        <tr><td class="num">2</td><td><span class="t">Technology Risk: Roadmaps and Figures of Merit</span><span class="d">Wed Oct 14 &middot; Lab visit: Li Lab (ChargeIQ) &middot; Living Brief #1 &middot; Bounty #1</span><span class="m">TRLs/MRLs and how they get gamed; choosing the metric that matters &mdash; and who decides; technical roadmapping.</span></td><td><span class="m">Living Brief #1; NASA, <em>Technology Readiness Levels</em>. Optional: Gans, Kearney, Scott &amp; Stern, &ldquo;Choosing Technology&rdquo;; Krieger, Schnitzer &amp; Watzinger, &ldquo;Standing on the Shoulders of Science.&rdquo;</span></td></tr>
-        <tr class="milestone"><td></td><td colspan="2">Milestone: Team Agreement due</td></tr>
-        <tr><td class="num">3</td><td><span class="t">Market Risk: Evidence in Markets That Don&rsquo;t Exist Yet</span><span class="d">Wed Oct 28 &middot; Living Brief #2 &middot; Bounty #2</span><span class="m">Beachhead selection under long sales cycles; discovery interview and experiment design; the LOI quality ladder; what counts as a traction signal.</span></td><td><span class="m">Living Brief #2 and posted readings.</span></td></tr>
-        <tr><td class="num">4</td><td><span class="t">The Government Customer</span><span class="d">Wed Nov 18 &middot; Guest: defense / dual-use practitioner</span><span class="m">SBIR/STTR, OTAs, DIU, primes vs. new entrants; data rights and IP with a government buyer; Space Systems Command as the anchor customer next door. Simulation: negotiate scope, milestones, and data rights against an AI contracting officer.</span></td><td><span class="m">Posted readings.</span></td></tr>
-        <tr class="milestone"><td></td><td colspan="2">Milestone: Strengths, Risks &amp; Considerations team meeting</td></tr>
-        <tr><td class="num">5</td><td><span class="t">Financing Risk: Milestones to Money</span><span class="d">Wed Dec 2 &middot; Guest: deep tech investor &middot; Bounty #3</span><span class="m">Capital-stack mapping across grants, venture, strategics, and debt; venture math for ten-year assets; non-dilutive pathways; term-sheet red flags; first-of-a-kind (FOAK) preview.</span></td><td><span class="m">Living Brief and posted readings.</span></td></tr>
-        <tr><td class="num">6</td><td><span class="t">Mid-Project Reviews</span><span class="d">Wed Dec 9 &middot; Guest reactor from the bench</span><span class="m">Phase 1 presentations (5&ndash;7 min per team) with structured peer feedback.</span></td><td><span class="m">Phase 1 slides.</span></td></tr>
-        <tr class="milestone"><td></td><td colspan="2">Milestone: TL-TR midpoint survey</td></tr>
-      </tbody>
-    </table>
-    </div>
-
-    <h3>Winter 2027 &mdash; MGMT 274B <span class="note">(dates TBD)</span></h3>
-    <div class="tablewrap">
-    <table>
-      <thead><tr><th>#</th><th>Session</th><th>Prepare</th></tr></thead>
-      <tbody>
-        <tr><td class="num">7</td><td><span class="t">Corridor Day</span><span class="d">Extended field session &middot; El Segundo / Hawthorne / Torrance</span><span class="m">Site visits inside two to three corridor companies, closing with a founders&rsquo; lunch panel. Live situation reports on adopted companies. The session runs long &mdash; plan accordingly.</span></td><td><span class="m">Visit-day dossier (Living Brief on each host).</span></td></tr>
-        <tr class="milestone"><td></td><td colspan="2">Milestone: Quarter Two planning meeting</td></tr>
-        <tr><td class="num">8</td><td><span class="t">Scale Risk: The Techno-Economics of Atoms</span><span class="d">Guest: manufacturing / operations leader &middot; Living Brief #5 &middot; Bounty #4</span><span class="m">Unit economics at 1&times; / 10&times; / 100&times;; learning curves and Wright&rsquo;s law; pilot purgatory; supply chains and manufacturability. Workshop: build your venture&rsquo;s techno-economic table and survive a line-item provenance drill.</span></td><td><span class="m">Living Brief #5; TEA template.</span></td></tr>
-        <tr class="milestone"><td></td><td colspan="2">Milestone: Motivation, Contribution &amp; Goals team meeting</td></tr>
-        <tr><td class="num">9</td><td><span class="t">Regulatory Risk and Leading for the Long Game</span><span class="d">Guest: tough tech CEO &middot; Living Brief #6 &middot; Bounty #5</span><span class="m">Regulatory pathway mapping and precedent mining; public legitimacy when hardware fails in public; leading teams over decade-long arcs.</span></td><td><span class="m">Living Brief #6; Raff &amp; Murray (posted).</span></td></tr>
-        <tr><td class="num">10</td><td><span class="t">The El Segundo Board Meeting</span><span class="d">March &middot; Venue announced Week 6</span><span class="m">Final defenses before a panel of corridor founders, investors, PIs, and faculty; line-item defense round; signature ceremony; public launch of The Corridor Census.</span></td><td><span class="m">Rehearse; bring printed, signed signature page.</span></td></tr>
-        <tr class="milestone"><td></td><td colspan="2">Milestone: TL-TR final report</td></tr>
-      </tbody>
-    </table>
-    </div>
-
-    <h2 id="deliverables">Deliverables &amp; grading</h2>
-    <div class="tablewrap">
-    <table>
-      <thead><tr><th>Assignment (across both terms)</th><th class="pct">Weight</th></tr></thead>
-      <tbody>
-        <tr class="group"><td colspan="2">Individual</td></tr>
-        <tr><td>Contribution &amp; Question Ledger</td><td class="pct">15%</td></tr>
-        <tr><td>Verification Bounties <span class="note">(best 4 of 5 rounds)</span></td><td class="pct">10%</td></tr>
-        <tr><td>Adopt-a-Company &amp; Corridor Census profile</td><td class="pct">5%</td></tr>
-        <tr><td>Innovation Landscape Field Guide</td><td class="pct">15%</td></tr>
-        <tr><td>Peer / Self Assessment</td><td class="pct">10%</td></tr>
-        <tr><td>Leadership Development</td><td class="pct">P/F</td></tr>
-        <tr class="group"><td colspan="2">Group</td></tr>
-        <tr><td>Weekly Progress Reports</td><td class="pct">P/F</td></tr>
-        <tr><td>Phase 1: Problem &amp; Initial Hypotheses</td><td class="pct">10%</td></tr>
-        <tr><td>Phase 2: Focal Risk Deep Dive &amp; Board Meeting</td><td class="pct">35%</td></tr>
-        <tr class="total"><td>Total</td><td class="pct">100%</td></tr>
-      </tbody>
-    </table>
-    </div>
-    <p class="note">Students are evaluated individually; team members can receive different grades. Students receive an &ldquo;I&rdquo; for the first term; grades are assigned at the close of the second term. Pass/fail components that are unsatisfactory reduce the final letter grade by one step. Full rubrics are on Bruin Learn.</p>
-
-    <h3>Individual</h3>
-    <details><summary>Contribution &amp; Question Ledger (15%)</summary>
-      <p>Attend every session and contribute. Missing more than two classes will affect your grade. Before every session with a guest or a Living Brief, submit by Tuesday 5 PM the one question you would ask if you had a single shot. Great questions carry a premise, would change a decision depending on the answer, and could not be answered by a model. The best get asked &mdash; by you &mdash; in class.</p></details>
-    <details><summary>Verification Bounties (10%)</summary>
-      <p>Five times during the year, class opens with a 15-minute bounty round on that week&rsquo;s Living Brief, which contains two to four seeded flaws. A verified catch earns +2, a partial catch +1, a confident false accusation &minus;1. Your grade uses your team&rsquo;s best four of five rounds; every student must present a catch at least once.</p></details>
-    <details><summary>Adopt-a-Company &amp; Corridor Census Profile (5%)</summary>
-      <p>Draft your corridor company in Week 1 and deliver 90-second situation reports when it makes news. In Week 9, submit a one-page company profile &mdash; public sources only, fully sourced, Judgment Log attached, signed. Profiles are edited into The Corridor Census; companies receive a courtesy right-of-reply, and anything not verifiable from public sources does not run.</p></details>
-    <details><summary>Innovation Landscape Field Guide (15%)</summary>
-      <p>A ~3-page memo plus one visual situating your team&rsquo;s invention in its industrial and technological context: a plain-language explanation of the technology; a TRL assessment including what the TRL number hides; a map of key players, adjacent technologies, and institutions; and where the gaps and opportunities are. In class you road-test it by explaining your invention to a classmate from another team and, where feasible, a practitioner from the bench. Judgment Log required.</p></details>
-    <details><summary>Peer / Self Assessment (10%)</summary>
-      <p>Twice during the year (end of Fall and end of Winter), reflect on your own contributions and give constructive feedback to teammates. Results are normalized and used to calibrate individual grades within teams.</p></details>
-    <details><summary>Leadership Development (P/F)</summary>
-      <p>A cadenced structure of leadership development assignments and team meetings with Matt Gorlick supports students and their teams throughout the year.</p></details>
-
-    <h3>Group</h3>
-    <details><summary>Weekly Progress Reports (P/F)</summary>
-      <p>Due Tuesdays at 5 PM PT, including non-class weeks: what has been accomplished, next steps, barriers &mdash; plus <em>Asks for the Bench</em>: the specific expert, introduction, or artifact your team needs this week, which the teaching team will work to route through the corridor network.</p></details>
-    <details><summary>Phase 1: Problem &amp; Initial Hypotheses (10%)</summary>
-      <p>Three slides, developed with your innovation co-founders: a concise problem statement; a stakeholder journey map from lab to end user; and the 3&ndash;5 baseline assumptions underlying value creation and capture, plus the focal risk you plan to pursue. Presented in Session 6.</p></details>
-    <details><summary>Phase 2: Focal Risk Deep Dive &amp; Board Meeting (35%)</summary>
-      <p>Select the most critical risk on the lab-to-market path and de-risk it through targeted action. What counts as early evidence depends on the focal risk:</p>
-      <ul>
-        <li><strong>Technology</strong> &mdash; a sequenced technical roadmap with 2&ndash;3 plausible pathways; consult 3+ technical experts outside your team.</li>
-        <li><strong>Market</strong> &mdash; 8+ discovery interviews across segments; an early-adopter profile; at least one traction signal.</li>
-        <li><strong>Regulatory</strong> &mdash; a step-by-step pathway map validated against public precedents; 3+ regulatory experts.</li>
-        <li><strong>Scale</strong> &mdash; a scale-up map, candidate suppliers or partners, and a techno-economic table you can defend line by line; 3+ external representatives.</li>
-        <li><strong>Financing</strong> &mdash; a capital-pathways map tying funding sources to technical and regulatory milestones; 3+ external sources.</li>
-      </ul>
-      <p>Deliverables: a ~20-slide deck (plus appendix), a one-page memo for your innovation team, your Judgment Log, and a signed signature page &mdash; defended in a ~15-minute pitch plus Q&amp;A at the El Segundo Board Meeting.</p></details>
-
-    <h2 id="ai">AI policy: required, disclosed, owned</h2>
-    <p>This course treats frontier AI the way a pilot treats instruments: mandatory, and never a substitute for airmanship.</p>
-    <ul>
-      <li><strong>Required.</strong> Use frontier AI tools on every substantial deliverable &mdash; research synthesis, drafting, modeling, critique. Declining to use them is a handicap this course will not teach around.</li>
-      <li><strong>Disclosed.</strong> Every graded artifact comes with a half-page <em>Judgment Log</em>: which tools you used and for what; what the AI drafted; what you changed and why; what you caught it getting wrong; how you verified the claims that carry weight. The log is graded on the delta &mdash; what did you add beyond the model?</li>
-      <li><strong>Owned.</strong> Your signature means every claim is yours. Unverified claims must be marked as such. Presenting AI output you cannot defend under questioning is this course&rsquo;s cardinal sin, and is treated as an integrity matter.</li>
-    </ul>
-    <p class="note">Required tools: a frontier AI assistant (free tiers are sufficient) and a lab notebook &mdash; digital or paper &mdash; for your Judgment Log. This policy operates within UCLA&rsquo;s <a href="https://www.deanofstudents.ucla.edu/Academic-Integrity">academic integrity policy</a>.</p>
-
-    <h2 id="team">Teaching team</h2>
-    <p><strong><a href="https://wujane.github.io/">Jane Wu</a></strong> &mdash; Faculty of record. Assistant Professor of Strategy at UCLA Anderson; faculty affiliate of the <a href="https://www.anderson.ucla.edu/about/centers/price-center-for-entrepreneurship-and-innovation">Price Center</a> and the <a href="https://www.anderson.ucla.edu/about/centers/easton-technology-management-center">Easton Technology Management Center</a>. Office hours Wednesdays 11 AM&ndash;12 PM online (link on Bruin Learn), or <a href="mailto:jane.wu@anderson.ucla.edu">by email</a>.</p>
-    <p><strong>Matt Gorlick</strong> &mdash; Leadership development. Runs the TL-TR surveys and the cadence of team meetings across both quarters.</p>
-    <p><strong>The bench</strong> &mdash; A rotating roster of corridor founders, investors, PIs, and operators who join as guests, Phase 2 consultants, and Board Meeting judges. Interested in hosting a site visit, judging, or bringing an invention to the class? <a href="mailto:jane.wu@anderson.ucla.edu">Get in touch.</a></p>
-
+    <p class="masthead-note">A weekly roundup of what the MGMT 274A/B cohort is reading in deep tech &mdash; and what is happening in the LA hard tech corridor. Written by the class, one forwarded email at a time. <a href="submit.html">Send us something.</a></p>
+    <div class="empty"><strong>Issue 1 lands this Friday.</strong>Nothing has been submitted yet &mdash; be the first. Forward any interesting deep tech link to <a href="submit.html">the inbox</a> and it runs in the next issue.</div>
     <footer>
-      <p>MGMT 274A/B &middot; UCLA Anderson School of Management &middot; Course materials and the current syllabus live on <a href="https://bruinlearn.ucla.edu/">Bruin Learn</a>. This page reflects the working draft of the AY 2026&ndash;27 syllabus and may change.</p>
+      <p>Tough Tech Weekly is assembled by the MGMT 274A/B cohort at UCLA Anderson. Links are submitted by students and posted unedited; a link here is not an endorsement by UCLA or the teaching team. Something wrong or shouldn&rsquo;t be here? <a href="mailto:jane.wu@anderson.ucla.edu">Tell us</a> and it comes down.<br>
+      Course materials live on <a href="https://bruinlearn.ucla.edu/">Bruin Learn</a>.</p>
     </footer>
   </main>
 </div>

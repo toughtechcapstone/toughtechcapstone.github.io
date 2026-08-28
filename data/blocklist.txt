@@ -1,0 +1,15 @@
+# One term per line, case-insensitive substring match against URL + title + note.
+# A match holds the submission out of the issue and logs it in the build output.
+# Keep this short: the UCLA-sender restriction is the real spam filter.
+viagra
+casino
+crypto giveaway
+free gift card
+onlyfans
+porn
+nude
+xxx
+loan approval
+work from home guaranteed
+bit.ly/
+tinyurl.com/

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESC}}">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESC}}">
+  <meta property="og:url" content="{{SITE}}{{CANON}}">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="{{PREFIX}}assets/style.css">
+  <link rel="alternate" type="application/rss+xml" title="Tough Tech Weekly" href="{{SITE}}feed.xml">
+</head>
+<body>
+<div class="wrapper">
+  <aside>
+    <p class="eyebrow">MGMT 274A/B &middot; UCLA Anderson</p>
+    <h1><a href="{{PREFIX}}index.html" style="color:inherit">Tough Tech Weekly</a></h1>
+    <p class="role">What the cohort is reading &mdash; deep tech, and the LA corridor</p>
+    <nav>
+      <a href="{{PREFIX}}index.html">Latest issue</a>
+      <a href="{{PREFIX}}index.html#archive">Archive</a>
+      <a href="{{PREFIX}}submit.html">Submit a link</a>
+      <a href="{{PREFIX}}reminders.html">Course reminders</a>
+      <a class="nav-sep" href="{{SITE}}feed.xml">RSS</a>
+      <a href="https://bruinlearn.ucla.edu/">Bruin Learn</a>
+      <a href="https://wujane.github.io/">Jane Wu</a>
+    </nav>
+  </aside>
+  <main>
+{{CONTENT}}
+    <footer>
+      <p>Tough Tech Weekly is assembled by the MGMT 274A/B cohort at UCLA Anderson. Links are submitted by students and posted unedited; a link here is not an endorsement by UCLA or the teaching team. Something wrong or shouldn&rsquo;t be here? <a href="mailto:{{EMAIL}}">Tell us</a> and it comes down.<br>
+      Course materials live on <a href="https://bruinlearn.ucla.edu/">Bruin Learn</a>.</p>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

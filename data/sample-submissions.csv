@@ -1,0 +1,4 @@
+timestamp,name,url,title,note,tag,status
+2026-09-30 08:12:00,Sample Student,https://example.com/a,Example award notice,"SAMPLE DATA — not a real submission. This is what a student note looks like when someone explains why a link matters.",socal,
+2026-09-30 14:40:00,Sample Student,https://example.org/b,Example technical result,,,
+2026-10-01 09:05:00,Another Sample,https://example.net/c,Example funding round,"SAMPLE DATA — second note, showing attribution.",,

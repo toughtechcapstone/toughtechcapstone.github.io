@@ -1,0 +1,43 @@
+name: Build newsletter
+
+on:
+  schedule:
+    - cron: '0 15 * * 5'   # Fridays 08:00 PT / 15:00 UTC
+    - cron: '0 15 * * 2'   # Tuesdays, mid-week refresh
+  workflow_dispatch:        # "Run workflow" button, for building on demand
+  push:
+    paths:
+      - 'build.py'
+      - 'config.json'
+      - 'templates/**'
+      - 'assets/**'
+      - 'data/blocklist.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-newsletter
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build site
+        run: python3 build.py
+      - name: Commit if changed
+        run: |
+          git config user.name  "tough-tech-weekly-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "Publish issue [skip ci]"
+            git push
+          else
+            echo "No changes."
+          fi

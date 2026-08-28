@@ -1,0 +1,42 @@
+    <h2>Submit a link</h2>
+    <p class="lede">See something in deep tech worth the cohort&rsquo;s attention? Send it. It takes ten seconds, nobody screens it first, and it goes out in Friday&rsquo;s issue.</p>
+
+<!--IF:EMAIL-->
+    <div class="cta">
+      <strong>Forward any email to</strong><br>
+      <span class="addr">{{EMAIL}}</span><br>
+      A newsletter, a press release, a link a friend sent you &mdash; just hit forward. Anything you type above the forwarded text becomes your note on why it matters.
+    </div>
+<!--ENDIF:EMAIL-->
+<!--IF:NOEMAIL-->
+    <div class="cta">
+      <strong>The submissions inbox is being set up.</strong><br>
+      The forwarding address will be posted here and announced in class before Session 1. Until then, send anything urgent to <a href="mailto:{{EMAIL}}">{{EMAIL}}</a>.
+    </div>
+<!--ENDIF:NOEMAIL-->
+<!--IF:FORM-->
+    <div class="cta">
+      <strong>Or use the 20-second form</strong><br>
+      <a href="{{FORM_URL}}">{{FORM_URL}}</a><br>
+      Better on your phone, and it works for things that aren&rsquo;t emails &mdash; a post, a job listing, a factory walkthrough video.
+    </div>
+<!--ENDIF:FORM-->
+    <h3>House rules</h3>
+    <ul>
+      <li><strong>Send from your UCLA address.</strong> Submissions from non-UCLA senders are dropped automatically &mdash; that is the entire spam filter, so it has to be strict.</li>
+      <li><strong>One link per submission.</strong> Send three separate emails if you have three things.</li>
+      <li><strong>Context is optional but wanted.</strong> One or two sentences on why this is interesting gets published as a pull quote with your first name on it. No note is fine too &mdash; the link still runs.</li>
+      <li><strong>Flag it if it&rsquo;s local.</strong> Put <em>SoCal</em> anywhere in your note and it gets tagged as corridor news.</li>
+    </ul>
+
+    <h3>What makes a good submission</h3>
+    <p>Not &ldquo;big company announces thing.&rdquo; The useful ones tend to be: a contract award or regulatory filing that reveals a strategy, a technical result that moves a figure of merit, a funding round with unusual structure, a hiring pattern that gives away a pivot, a company quietly dying. Primary sources beat coverage of primary sources.</p>
+    <p>Your note is the value-add. &ldquo;This is the first time anyone has flown that chemistry&rdquo; is worth more than the headline.</p>
+
+    <h3>What happens next</h3>
+    <ol class="steps">
+      <li>Your submission lands in a queue. Nothing is edited and nothing waits on approval.</li>
+      <li>Friday morning, everything from that week is compiled into a numbered issue and published here.</li>
+      <li>If something needs to come down &mdash; wrong link, second thoughts, anything &mdash; <a href="mailto:{{EMAIL}}">email</a> and it is gone on the next build. No explanation needed.</li>
+    </ol>
+    <p class="note">Your submissions are attributed by first name only. Your email address is recorded so we know submissions come from the cohort, and it is never published.</p>
