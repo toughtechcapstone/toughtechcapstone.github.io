@@ -188,6 +188,78 @@ function extractNote_(body, url) {
   return lines.join(' ').replace(/\s+/g, ' ').trim().slice(0, 600);
 }
 
+/**
+ * Why didn't my test email show up? Run this and read the log.
+ * It looks at recent mail whether or not it has already been processed, and
+ * prints the verdict for each message without changing anything.
+ */
+function diagnose() {
+  const id = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
+  console.log('SHEET_ID set: ' + (id ? 'yes' : 'NO -- run setup() first'));
+
+  const trigs = ScriptApp.getProjectTriggers().filter(function (t) {
+    return t.getHandlerFunction() === 'processInbox';
+  });
+  console.log('processInbox triggers installed: ' + trigs.length +
+              (trigs.length ? '' : '  <-- run installTrigger()'));
+  console.log('Allowed sender domains: ' + CONFIG.ALLOWED_DOMAINS.join(', '));
+  console.log('');
+
+  const threads = GmailApp.search('newer_than:7d', 0, 25);
+  console.log(threads.length + ' threads in the last 7 days (including archived and processed).');
+  if (!threads.length) {
+    console.log('Nothing arrived. Check the message was sent to this exact address,');
+    console.log('and look in Spam.');
+    return;
+  }
+
+  threads.forEach(function (thread) {
+    const labels = thread.getLabels().map(function (l) { return l.getName(); });
+    thread.getMessages().forEach(function (msg) {
+      const from = msg.getFrom();
+      const addr = (from.match(/<([^>]+)>/) || [null, from])[1].trim().toLowerCase();
+      const domain = addr.split('@')[1] || '';
+      const allowed = CONFIG.ALLOWED_DOMAINS.some(function (d) {
+        return domain === d || domain.endsWith('.' + d);
+      });
+      const url = firstLink_(msg.getPlainBody() || '');
+
+      let verdict;
+      if (!allowed) verdict = 'DROPPED - sender domain "' + domain + '" is not a UCLA domain';
+      else if (!url) verdict = 'DROPPED - no link found in the message body';
+      else verdict = 'OK - this would add a row';
+
+      console.log('---');
+      console.log('subject : ' + msg.getSubject());
+      console.log('from    : ' + addr);
+      console.log('link    : ' + (url || '(none)'));
+      console.log('labels  : ' + (labels.join(', ') || '(none)'));
+      console.log('verdict : ' + verdict);
+      if (allowed && url) console.log('note    : ' + (extractNote_(msg.getPlainBody() || '', url) || '(empty)'));
+    });
+  });
+
+  console.log('');
+  console.log('Messages already tagged ' + CONFIG.PROCESSED_LABEL + ' are skipped by processInbox.');
+  console.log('To make it look at them again, run reprocess().');
+}
+
+/** Clear the processed label from recent mail so processInbox reconsiders it. */
+function reprocess() {
+  const label = GmailApp.getUserLabelByName(CONFIG.PROCESSED_LABEL);
+  if (!label) {
+    console.log('No ' + CONFIG.PROCESSED_LABEL + ' label exists yet; nothing to clear.');
+    return;
+  }
+  const threads = label.getThreads(0, 50);
+  threads.forEach(function (t) {
+    t.removeLabel(label);
+    t.moveToInbox();
+  });
+  console.log(threads.length + ' threads moved back to the inbox and untagged.');
+  console.log('Run processInbox() to try them again.');
+}
+
 /** Run once to poll every 5 minutes. */
 function installTrigger() {
   ScriptApp.getProjectTriggers().forEach(function (t) {

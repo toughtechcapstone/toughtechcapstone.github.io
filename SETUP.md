@@ -92,6 +92,21 @@ If you skip this, the site simply does not mention a form.
 - **Check on the script:** script.google.com ▸ your project ▸ **Executions** shows
   every run and anything it logged.
 
+## When a submission does not show up
+
+Run **diagnose()** from the function dropdown and read the log. It lists recent mail
+with a verdict for each message, and tells you whether the trigger is installed. The
+three usual causes:
+
+1. `installTrigger()` was never run, so nothing is polling.
+2. The test was sent from a non-UCLA address. Mail from gmail.com, including from
+   this account to itself, is dropped on purpose.
+3. The message had no link in the body.
+
+A message that was already looked at carries the `ttw-processed` label and gets
+skipped. Run **reprocess()** to move recent mail back to the inbox and clear that
+label, then **processInbox()** to try again.
+
 ## What to tell students
 
 > Forward anything interesting in deep tech to **toughtechcapstone@gmail.com** from
