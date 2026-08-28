@@ -1,0 +1,16 @@
+<svg viewBox="0 0 210 140" role="img" aria-label="A dish antenna listening for an incoming signal.">
+  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="rotate(-34 92 74)">
+      <ellipse cx="92" cy="74" rx="42" ry="14"/>
+      <path d="M50 74a42 30 0 0 0 84 0" opacity=".45"/>
+    </g>
+    <path d="M92 74l22-15"/>
+    <circle cx="117" cy="57" r="4"/>
+    <path d="M92 74v42M76 116h32M84 116l-8 12M100 116l8 12"/>
+    <g opacity=".5">
+      <path d="M140 44a22 22 0 0 1 12 18"/>
+      <path d="M150 33a34 34 0 0 1 18 28"/>
+      <path d="M160 22a46 46 0 0 1 24 38"/>
+    </g>
+  </g>
+</svg>

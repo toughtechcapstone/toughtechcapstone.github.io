@@ -27,7 +27,8 @@ row in the sheet, which drops it on the next build.
 | `data/blocklist.txt` | Terms that hold a submission out of an issue. |
 | `apps-script/Code.gs` | Gmail intake, pasted into the Apps Script editor. |
 | `.github/workflows/build.yml` | Builds Tuesdays and Fridays, and on demand. |
-| `index.html`, `issues/`, `feed.xml`, `submit.html`, `reminders.html` | **Generated — do not hand-edit.** |
+| `templates/svg/` | The line drawings, inlined at build time via `{{SVG:name}}`. |
+| `index.html`, `issues/`, `submit.html`, `reminders.html` | **Generated — do not hand-edit.** |
 
 ## Local build
 

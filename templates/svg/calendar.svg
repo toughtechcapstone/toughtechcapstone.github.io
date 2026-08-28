@@ -1,0 +1,12 @@
+<svg viewBox="0 0 210 118" role="img" aria-label="A term calendar with session dates marked.">
+  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="24" y="24" width="162" height="80" rx="2"/>
+    <path d="M24 46h162"/>
+    <path d="M60 16v14M150 16v14"/>
+    <g opacity=".4">
+      <path d="M60 46v58M96 46v58M132 46v58M168 46v58M24 66h162M24 86h162"/>
+    </g>
+    <rect x="98" y="68" width="16" height="16" rx="1.5"/>
+    <circle cx="42" cy="56" r="3"/><circle cx="150" cy="76" r="3"/><circle cx="78" cy="94" r="3"/>
+  </g>
+</svg>

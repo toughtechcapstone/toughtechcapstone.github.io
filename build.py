@@ -3,10 +3,10 @@
 
 Reads a CSV (published Google Sheet tab, or a local file), groups submissions
 into weekly issues, and writes index.html, submit.html, reminders.html,
-issues/*.html and feed.xml. No dependencies beyond the standard library.
+and issues/*.html. No dependencies beyond the standard library.
 """
 import csv, html, io, json, os, re, sys, urllib.parse, urllib.request
-from datetime import datetime, date, timedelta, timezone
+from datetime import datetime, date, timedelta
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = ROOT  # output dir; overridden by --out for preview builds
@@ -22,6 +22,15 @@ def cfg():
 def tpl(name):
     with open(os.path.join(ROOT, "templates", name)) as f:
         return f.read()
+
+
+def svg(name):
+    with open(os.path.join(ROOT, "templates", "svg", name + ".svg")) as f:
+        return f.read().strip()
+
+
+def inline_svgs(text):
+    return re.sub(r"\{\{SVG:([a-z0-9_-]+)\}\}", lambda m: svg(m.group(1)), text)
 
 
 def blocklist():
@@ -164,7 +173,7 @@ def pretty(d):
 
 
 def render_items(items):
-    out = []
+    out = ['    <div class="items">']
     for it in items:
         tag = '<span class="tag">SoCal</span>' if it["local"] else ""
         why = ""
@@ -172,7 +181,7 @@ def render_items(items):
             cite = f'<cite>&mdash; {html.escape(it["name"])}</cite>' if it["name"] else ""
             why = f'<p class="why">{html.escape(it["note"])}{cite}</p>'
         elif it["name"]:
-            why = f'<p class="note">Submitted by {html.escape(it["name"])}</p>'
+            why = f'<p class="by">Submitted by {html.escape(it["name"])}</p>'
         out.append(
             '    <div class="item">\n'
             f'      <h3><a href="{html.escape(it["url"], quote=True)}" rel="noopener nofollow">{html.escape(it["title"])}</a></h3>\n'
@@ -180,6 +189,7 @@ def render_items(items):
             f'      {why}\n'
             '    </div>'
         )
+    out.append('    </div>')
     return "\n".join(out)
 
 
@@ -205,7 +215,7 @@ def page(conf, title, desc, canon, content, prefix=""):
                  ("{{PREFIX}}", prefix), ("{{SITE}}", conf["site"]),
                  ("{{EMAIL}}", email_out), ("{{FORM_URL}}", form)):
         body = body.replace(k, v)
-    return body
+    return inline_svgs(body)
 
 
 def write(path, text):
@@ -222,7 +232,8 @@ def build(conf, issues, outdir=None):
     latest = issues[-1] if issues else None
 
     # --- index ---
-    c = [f'    <p class="masthead-note">A weekly roundup of what the MGMT 274A/B cohort is reading in deep tech &mdash; and what is happening in the LA hard tech corridor. Written by the class, one forwarded email at a time. <a href="submit.html">Send us something.</a></p>']
+    c = ['    <div class="fig">{{SVG:hero}}</div>',
+         f'    <p class="masthead-note">A weekly roundup of what the MGMT 274A/B cohort is reading in deep tech &mdash; and what is happening in the LA hard tech corridor. Written by the class, one forwarded email at a time. <a href="submit.html">Send us something.</a></p>']
     if latest:
         c.append('    <div class="issue-head">')
         c.append(f'      <h2>Issue {latest["n"]}</h2>')
@@ -230,6 +241,7 @@ def build(conf, issues, outdir=None):
         c.append('    </div>')
         c.append(render_items(latest["items"]))
     else:
+        c.append('    <div class="fig small">{{SVG:antenna}}</div>')
         c.append('    <div class="empty"><strong>Issue 1 lands this Friday.</strong>'
                  'Nothing has been submitted yet &mdash; be the first. Forward any interesting '
                  f'deep tech link to <a href="submit.html">the inbox</a> and it runs in the next issue.</div>')
@@ -263,27 +275,6 @@ def build(conf, issues, outdir=None):
           "Meeting dates, deadlines, and course goals for MGMT 274A/B Tough Tech Commercialization at UCLA Anderson.",
           "reminders.html", tpl("reminders.html")))
 
-    # --- rss ---
-    now = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")
-    x = ['<?xml version="1.0" encoding="UTF-8"?>',
-         '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">', '<channel>',
-         '<title>Tough Tech Weekly</title>', f'<link>{conf["site"]}</link>',
-         '<description>Deep tech and LA hard tech corridor links, assembled weekly by the MGMT 274A/B cohort at UCLA Anderson.</description>',
-         '<language>en-us</language>', f'<lastBuildDate>{now}</lastBuildDate>',
-         f'<atom:link href="{conf["site"]}feed.xml" rel="self" type="application/rss+xml"/>']
-    for iss in reversed(issues[-25:]):
-        pub = datetime.combine(iss["published"], datetime.min.time()).strftime("%a, %d %b %Y 15:00:00 +0000")
-        body = "".join(
-            f'<p><a href="{html.escape(i["url"], quote=True)}">{html.escape(i["title"])}</a> ({html.escape(i["host"])})'
-            + (f'<br>{html.escape(i["note"])}' + (f' &mdash; {html.escape(i["name"])}' if i["name"] else "") if i["note"] else "")
-            + '</p>' for i in iss["items"])
-        x += ['<item>', f'<title>Issue {iss["n"]} — {pretty(iss["published"])}</title>',
-              f'<link>{conf["site"]}{iss["slug"]}</link>',
-              f'<guid isPermaLink="true">{conf["site"]}{iss["slug"]}</guid>',
-              f'<pubDate>{pub}</pubDate>',
-              f'<description><![CDATA[{body}]]></description>', '</item>']
-    x += ['</channel>', '</rss>']
-    write("feed.xml", "\n".join(x) + "\n")
 
 
 def main():

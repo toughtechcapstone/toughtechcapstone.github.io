@@ -1,0 +1,27 @@
+<svg viewBox="0 0 620 196" role="img" aria-label="Schematic of the lab-to-market path: a laboratory flask, a pilot production line, and a launch.">
+  <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M78 62v28l-22 42q-4 8 5 8h58q9 0 5-8l-22-42V62"/>
+    <path d="M74 62h32"/>
+    <path d="M62 124q8-6 16 0t16 0 16 0"/>
+    <circle cx="78" cy="112" r="2"/><circle cx="87" cy="103" r="2"/><circle cx="94" cy="115" r="2"/>
+    <path d="M250 140v-40h100v40"/>
+    <path d="M250 100l12-14v14l12-14v14l12-14v14"/>
+    <path d="M332 100V82h10v18"/>
+    <circle cx="312" cy="118" r="11"/>
+    <path d="M312 103v-5M312 133v5M297 118h-5M327 118h5M301 107l-4-4M323 129l4 4M323 107l4-4M301 129l-4 4"/>
+    <path d="M498 110V64q0-16 14-30 14 14 14 30v46z"/>
+    <path d="M498 94l-12 18 12-4M526 94l12 18-12-4"/>
+    <circle cx="512" cy="66" r="4"/>
+    <path d="M505 114l-3 12M512 116v14M519 114l3 12"/>
+    <path d="M356 92c58-10 108-24 142-48" stroke-dasharray="3 5" opacity=".55"/>
+    <path d="M140 120h96M228 114l8 6-8 6"/>
+    <path d="M366 120h96M454 114l8 6-8 6"/>
+    <path d="M30 158h560" opacity=".45"/>
+    <path d="M90 154v8M300 154v8M512 154v8" opacity=".45"/>
+  </g>
+  <g fill="currentColor" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9.5" letter-spacing="1.4" text-anchor="middle" opacity=".6">
+    <text x="90" y="180">LAB</text>
+    <text x="300" y="180">PILOT</text>
+    <text x="512" y="180">MARKET</text>
+  </g>
+</svg>
