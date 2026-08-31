@@ -67,21 +67,46 @@ function getSheet_() {
   return sheet;
 }
 
+/** Message ids already handled. Tracked per message, not per thread. */
+function seenIds_() {
+  const raw = PropertiesService.getScriptProperties().getProperty('PROCESSED_IDS');
+  try {
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function rememberIds_(ids) {
+  const kept = ids.slice(-400);   // plenty of history, well inside the size limit
+  PropertiesService.getScriptProperties().setProperty('PROCESSED_IDS', JSON.stringify(kept));
+}
+
 function processInbox() {
   const sheet = getSheet_();
 
   let label = GmailApp.getUserLabelByName(CONFIG.PROCESSED_LABEL);
   if (!label) label = GmailApp.createLabel(CONFIG.PROCESSED_LABEL);
 
-  const threads = GmailApp.search(
-    'in:inbox -label:' + CONFIG.PROCESSED_LABEL + ' newer_than:30d', 0, CONFIG.MAX_THREADS);
+  // Deliberately no "-label:" filter here. Gmail groups a second forward of the
+  // same article into the existing thread, and excluding the thread would hide
+  // every later message in it. Dedupe happens per message id instead.
+  const threads = GmailApp.search('in:inbox newer_than:30d', 0, CONFIG.MAX_THREADS);
 
-  let added = 0;
+  const seen = seenIds_();
+  const seenSet = {};
+  seen.forEach(function (id) { seenSet[id] = true; });
+
+  let added = 0, skipped = 0;
   threads.forEach(function (thread) {
     thread.getMessages().forEach(function (msg) {
+      const id = msg.getId();
+      if (seenSet[id]) { skipped++; return; }
       try {
         const row = parseMessage_(msg);
         if (row) { sheet.appendRow(row); added++; }
+        seen.push(id);
+        seenSet[id] = true;
       } catch (err) {
         console.error('Failed on a message: ' + err);
       }
@@ -90,7 +115,11 @@ function processInbox() {
     thread.moveToArchive();
   });
 
-  if (threads.length) console.log(threads.length + ' threads processed, ' + added + ' rows added.');
+  rememberIds_(seen);
+  if (threads.length) {
+    console.log(threads.length + ' threads scanned, ' + added + ' rows added, ' +
+                skipped + ' already seen.');
+  }
 }
 
 function parseMessage_(msg) {
@@ -219,13 +248,16 @@ function diagnose() {
   console.log('Allowed sender domains: ' + CONFIG.ALLOWED_DOMAINS.join(', '));
   console.log('');
 
-  const threads = GmailApp.search('newer_than:7d', 0, 25);
-  console.log(threads.length + ' threads in the last 7 days (including archived and processed).');
+  // in:anywhere so Spam and Trash show up too; plain search hides them.
+  const threads = GmailApp.search('newer_than:7d in:anywhere', 0, 25);
+  console.log(threads.length + ' threads in the last 7 days (including spam, trash and archived).');
   if (!threads.length) {
-    console.log('Nothing arrived. Check the message was sent to this exact address,');
-    console.log('and look in Spam.');
+    console.log('Nothing arrived at all. Check the message was sent to this exact address.');
     return;
   }
+
+  const seenSet = {};
+  seenIds_().forEach(function (id) { seenSet[id] = true; });
 
   threads.forEach(function (thread) {
     const labels = thread.getLabels().map(function (l) { return l.getName(); });
@@ -239,23 +271,26 @@ function diagnose() {
       const url = firstLink_(msg.getPlainBody() || '');
 
       let verdict;
-      if (!allowed) verdict = 'DROPPED - sender domain "' + domain + '" is not a UCLA domain';
+      if (seenSet[msg.getId()]) verdict = 'ALREADY PROCESSED - a row was added for this message';
+      else if (!allowed) verdict = 'DROPPED - sender domain "' + domain + '" is not a UCLA domain';
       else if (!url) verdict = 'DROPPED - no link found in the message body';
-      else verdict = 'OK - this would add a row';
+      else verdict = 'OK - this would add a row on the next run';
 
       console.log('---');
       console.log('subject : ' + msg.getSubject());
+      console.log('date    : ' + msg.getDate());
       console.log('from    : ' + addr);
       console.log('link    : ' + (url || '(none)'));
       console.log('labels  : ' + (labels.join(', ') || '(none)'));
+      console.log('in spam : ' + thread.isInSpam());
       console.log('verdict : ' + verdict);
       if (allowed && url) console.log('note    : ' + (extractNote_(msg.getPlainBody() || '', url) || '(empty)'));
     });
   });
 
   console.log('');
-  console.log('Messages already tagged ' + CONFIG.PROCESSED_LABEL + ' are skipped by processInbox.');
-  console.log('To make it look at them again, run reprocess().');
+  console.log('Messages listed as ALREADY PROCESSED are skipped by processInbox.');
+  console.log('To make it look at everything again, run reprocess().');
 }
 
 /** Clear the processed label from recent mail so processInbox reconsiders it. */
@@ -270,8 +305,11 @@ function reprocess() {
     t.removeLabel(label);
     t.moveToInbox();
   });
+  PropertiesService.getScriptProperties().deleteProperty('PROCESSED_IDS');
   console.log(threads.length + ' threads moved back to the inbox and untagged.');
-  console.log('Run processInbox() to try them again.');
+  console.log('Processed-message memory cleared too.');
+  console.log('Run processInbox() to try them again. Duplicate links are collapsed');
+  console.log('when the site builds, so re-adding an old one is harmless.');
 }
 
 /** Run once to poll every 5 minutes. */
