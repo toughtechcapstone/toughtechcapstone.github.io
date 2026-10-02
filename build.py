@@ -5,7 +5,7 @@ Reads a CSV (published Google Sheet tab, or a local file), groups submissions
 into weekly issues, and writes index.html, submit.html, reminders.html,
 and issues/*.html. No dependencies beyond the standard library.
 """
-import csv, html, io, json, os, re, sys, urllib.parse, urllib.request
+import base64, csv, html, io, json, os, re, sys, urllib.parse, urllib.request
 from datetime import datetime, date, timedelta
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -98,6 +98,33 @@ TRACKING = ("utm_", "fbclid", "gclid", "mc_cid", "mc_eid", "igshid", "_bhlid",
             "ref_src", "source", "triedsigningin")
 
 
+def unwrap_url(u):
+    """Follow newsletter redirect wrappers through to the article itself.
+
+    Substack mails links as substack.com/redirect/2/<base64>.<signature>, and the
+    payload often points at a subscribe page carrying the real article in ?next=.
+    """
+    for _ in range(3):
+        p = urllib.parse.urlsplit(u)
+        if p.netloc.lower().endswith("substack.com") and p.path.startswith("/redirect/"):
+            token = p.path.rstrip("/").split("/")[-1].split(".")[0]
+            try:
+                raw = base64.urlsafe_b64decode(token + "=" * (-len(token) % 4))
+                inner = json.loads(raw.decode("utf-8", "replace")).get("e")
+            except Exception:
+                inner = None
+            if inner:
+                u = inner
+                continue
+        params = dict(urllib.parse.parse_qsl(p.query))
+        nxt = params.get("next") or params.get("url") or params.get("q")
+        if nxt and nxt.lower().startswith("http"):
+            u = urllib.parse.unquote(nxt)
+            continue
+        break
+    return u
+
+
 def clean_url(u):
     """Drop tracking parameters, keeping everything else about the URL intact."""
     try:
@@ -140,7 +167,7 @@ def clean(rows, terms, do_fetch=True):
         url = row.get("url") or row.get("link") or ""
         if not re.match(r"^https?://", url, re.I):
             continue
-        url = clean_url(url)
+        url = clean_url(unwrap_url(url))
         status = (row.get("status") or "").lower()
         if status in ("held", "removed", "hidden", "spam"):
             held += 1
@@ -293,6 +320,16 @@ def build(conf, issues, outdir=None):
         write(iss["slug"], page(conf, f"Issue {iss['n']} — Tough Tech Weekly",
               f"Tough Tech Weekly issue {iss['n']}, {pretty(iss['published'])}: {len(iss['items'])} links from the MGMT 274A/B cohort.",
               iss["slug"], "\n".join(c), prefix="../"))
+
+    # Drop issue pages for weeks that are no longer in the sheet, so a deleted
+    # row cannot leave an orphan page behind competing for the same number.
+    issues_dir = os.path.join(OUT, "issues")
+    keep = {os.path.basename(i["slug"]) for i in issues}
+    if os.path.isdir(issues_dir):
+        for stale in sorted(os.listdir(issues_dir)):
+            if stale.endswith(".html") and stale not in keep:
+                os.remove(os.path.join(issues_dir, stale))
+                print(f"  removed stale issues/{stale}")
 
     # --- static pages ---
     write("submit.html", page(conf, "Submit a link — Tough Tech Weekly",
