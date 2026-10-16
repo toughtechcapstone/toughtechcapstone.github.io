@@ -144,7 +144,11 @@ def tidy_name(raw):
         after = n.split(",", 1)[1].strip()
         n = after or n.split(",", 1)[0]
     n = re.split(r"[\s.]+", n.strip())[0] if n.strip() else ""
-    return re.sub(r"[^A-Za-zÀ-ɏ'\-]", "", n)[:40]
+    n = re.sub(r"[^A-Za-zÀ-ɏ'\-]", "", n)[:40]
+    # Mail clients often send the display name shouting; "JACK" reads badly.
+    if len(n) > 2 and n.isupper():
+        n = n.capitalize()
+    return n
 
 
 def fetch_title(url):
@@ -162,7 +166,7 @@ def fetch_title(url):
 
 
 def clean(rows, terms, do_fetch=True):
-    items, seen, held = [], set(), 0
+    items, seen, held = [], {}, 0
     for row in rows:
         url = row.get("url") or row.get("link") or ""
         if not re.match(r"^https?://", url, re.I):
@@ -181,8 +185,12 @@ def clean(rows, terms, do_fetch=True):
             continue
         key = norm_url(url)
         if key in seen:
+            # Same link submitted twice. Keep whichever row carries the fuller
+            # note, so re-running the mail intake can repair a truncated one.
+            prior = seen[key]
+            if len(note) > len(prior["note"]):
+                prior["note"] = note
             continue
-        seen.add(key)
         ts = parse_ts(row.get("timestamp") or row.get("date") or "")
         if ts is None:
             continue
@@ -195,8 +203,10 @@ def clean(rows, terms, do_fetch=True):
         host = urllib.parse.urlsplit(url).netloc.lower()
         if host.startswith("www."):
             host = host[4:]
-        items.append({"url": url, "title": title or host, "note": note,
-                      "name": name, "host": host, "local": local, "ts": ts})
+        item = {"url": url, "title": title or host, "note": note,
+                "name": name, "host": host, "local": local, "ts": ts}
+        seen[key] = item
+        items.append(item)
     items.sort(key=lambda i: i["ts"])
     return items, held
 
@@ -233,7 +243,9 @@ def render_items(items):
         why = ""
         if it["note"]:
             cite = f'<cite>&mdash; {html.escape(it["name"])}</cite>' if it["name"] else ""
-            why = f'<p class="why">{html.escape(it["note"])}{cite}</p>'
+            paras = [p.strip() for p in re.split(r"\n\s*\n", it["note"]) if p.strip()]
+            body = "".join(f"<p>{html.escape(p)}</p>" for p in paras)
+            why = f'<div class="why">{body}{cite}</div>'
         elif it["name"]:
             why = f'<p class="by">Submitted by {html.escape(it["name"])}</p>'
         out.append(

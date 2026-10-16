@@ -148,6 +148,8 @@ main h3 {
   border-left: 2px solid var(--ink);
   font-size: 14.5px; color: var(--soft);
 }
+.item .why p { margin: 0 0 9px; }
+.item .why p:last-of-type { margin-bottom: 0; }
 .item .why cite {
   display: block; margin-top: 6px; font-style: normal;
   font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: 0.04em;

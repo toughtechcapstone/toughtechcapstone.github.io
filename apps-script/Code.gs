@@ -181,7 +181,12 @@ function firstName_(displayName, addr) {
   }
   if (!n) n = addr.split('@')[0];
   n = n.trim().split(/[\s.]+/)[0];
-  return n.replace(/[^A-Za-zÀ-ɏ'\-]/g, '');
+  n = n.replace(/[^A-Za-zÀ-ɏ'\-]/g, '');
+  // Mail clients often send the display name shouting; "JACK" reads badly.
+  if (n.length > 2 && n === n.toUpperCase()) {
+    n = n.charAt(0) + n.slice(1).toLowerCase();
+  }
+  return n;
 }
 
 /** First real link in the body, skipping list-management and tracking URLs. */
@@ -204,6 +209,10 @@ function firstLink_(body) {
  * or above the first link if they just pasted one in.
  */
 function extractNote_(body, url) {
+  // Everything the student wrote themselves, which is whatever sits above the
+  // forwarded message. Links are stripped out of the prose rather than used as
+  // a stopping point: people write "this article (https://...) shows that ...",
+  // and cutting at the first link threw away the actual point.
   const markers = [
     /-{2,}\s*Forwarded message\s*-{2,}/i,
     /^\s*Begin forwarded message:/im,
@@ -216,19 +225,38 @@ function extractNote_(body, url) {
     if (hit > -1) head = head.slice(0, hit);
   });
 
-  const urlAt = head.indexOf(url);
-  if (urlAt > -1) head = head.slice(0, urlAt);
+  // Angle-bracketed and bare links come out; surrounding punctuation is tidied
+  // below so "article (<link>) shows" does not leave stray brackets behind.
+  head = head.replace(/<https?:\/\/[^>\s]+>/gi, ' ')
+             .replace(/https?:\/\/[^\s<>()\[\]"']+/gi, ' ');
 
-  const lines = head.split('\n').filter(function (line) {
-    const t = line.trim();
-    if (!t) return false;
-    if (t.startsWith('>')) return false;                          // quoted text
-    if (/^(sent from|get outlook|--\s*$)/i.test(t)) return false; // signatures
-    if (/^https?:\/\//i.test(t)) return false;
-    return true;
+  const paragraphs = [];
+  head.split(/\n\s*\n/).forEach(function (block) {
+    const lines = block.split('\n').filter(function (line) {
+      const t = line.trim();
+      if (!t) return false;
+      if (t.startsWith('>')) return false;                      // quoted text
+      if (/^(sent from|get outlook|confidential)/i.test(t)) return false;
+      if (/^--\s*$/.test(t)) return false;                      // signature marker
+      if (/^[\d\s]*[.):\-•*]+\s*$/.test(t)) return false;       // "1:" left behind by a removed link
+      return true;
+    });
+    let text = lines.join(' ').replace(/[ \t]+/g, ' ').trim();
+    text = text.replace(/\(\s*\)|\[\s*\]|<\s*>/g, '')           // emptied brackets
+               .replace(/\s+([,.;:!?])/g, '$1')
+               .replace(/\s{2,}/g, ' ')
+               .trim();
+    if (text) paragraphs.push(text);
   });
 
-  return lines.join(' ').replace(/\s+/g, ' ').trim().slice(0, 600);
+  let note = paragraphs.join('\n\n');
+
+  // Drop a leading salutation so notes start with the substance.
+  note = note.replace(/^(hi|hello|hey|dear|good (morning|afternoon|evening))\b[^\n,]{0,40},?\s*/i, '');
+  // Drop a trailing sign-off and whatever name follows it.
+  note = note.replace(/\n*\s*(best|thanks|thank you|cheers|regards|best regards|sincerely)[,!]?\s*[A-Za-z .'-]{0,40}\s*$/i, '');
+
+  return note.trim().slice(0, 4000);
 }
 
 /**
