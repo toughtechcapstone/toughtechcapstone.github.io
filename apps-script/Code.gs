@@ -251,8 +251,14 @@ function extractNote_(body, url) {
 
   let note = paragraphs.join('\n\n');
 
-  // Drop a leading salutation so notes start with the substance.
-  note = note.replace(/^(hi|hello|hey|dear|good (morning|afternoon|evening))\b[^\n,]{0,40},?\s*/i, '');
+  // Drop a leading salutation so notes start with the substance. Only when the
+  // part before the comma is three words or fewer, so a sentence that happens to
+  // open with "Professor Wu argues that X, ..." keeps its text.
+  note = note.replace(
+    /^((?:hi|hello|hey|dear|professor|prof|good (?:morning|afternoon|evening))[^\n,]{0,30}),\s*/i,
+    function (match, head) {
+      return head.trim().split(/\s+/).length <= 3 ? '' : match;
+    });
   // Drop a trailing sign-off and whatever name follows it.
   note = note.replace(/\n*\s*(best|thanks|thank you|cheers|regards|best regards|sincerely)[,!]?\s*[A-Za-z .'-]{0,40}\s*$/i, '');
 
