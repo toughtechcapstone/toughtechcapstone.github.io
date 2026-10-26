@@ -2,8 +2,7 @@ name: Build newsletter
 
 on:
   schedule:
-    - cron: '0 15 * * 5'   # Fridays 08:00 PT / 15:00 UTC
-    - cron: '0 15 * * 2'   # Tuesdays, mid-week refresh
+    - cron: '0 */3 * * *'  # every 3 hours, so a submission appears the same day
   workflow_dispatch:        # "Run workflow" button, for building on demand
   push:
     paths:

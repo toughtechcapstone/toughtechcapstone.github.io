@@ -151,6 +151,26 @@ def tidy_name(raw):
     return n
 
 
+TITLE_CACHE = os.path.join(ROOT, "data", "titles.json")
+
+
+def load_titles():
+    try:
+        with open(TITLE_CACHE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_titles(cache):
+    try:
+        os.makedirs(os.path.dirname(TITLE_CACHE), exist_ok=True)
+        with open(TITLE_CACHE, "w") as f:
+            json.dump(cache, f, indent=1, sort_keys=True, ensure_ascii=False)
+    except Exception as e:
+        print(f"  ! could not save title cache: {e.__class__.__name__}", file=sys.stderr)
+
+
 def fetch_title(url):
     try:
         req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -167,6 +187,7 @@ def fetch_title(url):
 
 def clean(rows, terms, do_fetch=True):
     items, seen, held = [], {}, 0
+    titles = load_titles()
     for row in rows:
         url = row.get("url") or row.get("link") or ""
         if not re.match(r"^https?://", url, re.I):
@@ -198,8 +219,15 @@ def clean(rows, terms, do_fetch=True):
         name = tidy_name(name)
         tag = (row.get("tag") or "").strip().lower()
         local = "socal" in tag or "local" in tag or "socal" in note.lower()
-        if not title and do_fetch:
-            title = fetch_title(url) or ""
+        if not title:
+            # Cached so that frequent rebuilds do not re-request every article.
+            cached = titles.get(key)
+            if cached:
+                title = cached
+            elif do_fetch:
+                title = fetch_title(url) or ""
+                if title:
+                    titles[key] = title
         host = urllib.parse.urlsplit(url).netloc.lower()
         if host.startswith("www."):
             host = host[4:]
@@ -208,6 +236,7 @@ def clean(rows, terms, do_fetch=True):
         seen[key] = item
         items.append(item)
     items.sort(key=lambda i: i["ts"])
+    save_titles(titles)
     return items, held
 
 
