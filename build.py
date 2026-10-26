@@ -379,6 +379,9 @@ def build(conf, issues, outdir=None):
     write("reminders.html", page(conf, "Key course reminders — MGMT 274A/B",
           "Meeting dates, deadlines, and course goals for MGMT 274A/B Tough Tech Commercialization at UCLA Anderson.",
           "reminders.html", tpl("reminders.html")))
+    write("speakers.html", page(conf, "Guest speakers — MGMT 274A/B",
+          "Guest speakers for each session of MGMT 274A/B Tough Tech Commercialization at UCLA Anderson, 2026-27.",
+          "speakers.html", tpl("speakers.html")))
 
 
 
