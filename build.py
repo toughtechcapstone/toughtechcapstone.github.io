@@ -98,6 +98,9 @@ TRACKING = ("utm_", "fbclid", "gclid", "mc_cid", "mc_eid", "igshid", "_bhlid",
             "ref_src", "source", "triedsigningin")
 
 
+SAFE_SCHEME = re.compile(r"^https?://", re.I)
+
+
 def unwrap_url(u):
     """Follow newsletter redirect wrappers through to the article itself.
 
@@ -113,14 +116,16 @@ def unwrap_url(u):
                 inner = json.loads(raw.decode("utf-8", "replace")).get("e")
             except Exception:
                 inner = None
-            if inner:
+            if inner and SAFE_SCHEME.match(inner):
                 u = inner
                 continue
         params = dict(urllib.parse.parse_qsl(p.query))
         nxt = params.get("next") or params.get("url") or params.get("q")
-        if nxt and nxt.lower().startswith("http"):
-            u = urllib.parse.unquote(nxt)
-            continue
+        if nxt:
+            candidate = urllib.parse.unquote(nxt)
+            if SAFE_SCHEME.match(candidate):
+                u = candidate
+                continue
         break
     return u
 
@@ -193,6 +198,12 @@ def clean(rows, terms, do_fetch=True):
         if not re.match(r"^https?://", url, re.I):
             continue
         url = clean_url(unwrap_url(url))
+        # Re-check after unwrapping: a redirect wrapper's payload is attacker
+        # controlled, so the scheme must be proven again before it becomes an href.
+        if not SAFE_SCHEME.match(url):
+            print(f"  ! held, unsafe scheme after unwrap: {url[:80]}", file=sys.stderr)
+            held += 1
+            continue
         status = (row.get("status") or "").lower()
         if status in ("held", "removed", "hidden", "spam"):
             held += 1
