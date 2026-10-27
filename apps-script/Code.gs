@@ -14,7 +14,7 @@ const CONFIG = {
   ALLOWED_DOMAINS: ['anderson.ucla.edu', 'ucla.edu', 'g.ucla.edu'],
   PROCESSED_LABEL: 'ttw-processed',
   MAX_THREADS: 150,
-  HEADERS: ['timestamp', 'name', 'url', 'title', 'note', 'tag', 'status', 'email'],
+  HEADERS: ['timestamp', 'name', 'url', 'title', 'note', 'tag', 'status'],
 };
 
 /**
@@ -97,20 +97,36 @@ function processInbox() {
   const seenSet = {};
   seen.forEach(function (id) { seenSet[id] = true; });
 
-  let added = 0, skipped = 0;
+  let added = 0, skipped = 0, rescued = 0;
   threads.forEach(function (thread) {
+    const wasSpam = thread.isInSpam();
+    let tookSomething = false;
     thread.getMessages().forEach(function (msg) {
       const id = msg.getId();
       if (seenSet[id]) { skipped++; return; }
       try {
         const row = parseMessage_(msg);
-        if (row) { sheet.appendRow(row); added++; }
+        if (row) {
+          // The address is split off here and never written to the published
+          // spreadsheet. It goes to a separate private file instead.
+          const email = row.pop();
+          sheet.appendRow(row);
+          sendersSheet_().appendRow([row[0], row[2], email]);
+          added++;
+          tookSomething = true;
+        }
         seen.push(id);
         seenSet[id] = true;
       } catch (err) {
         console.error('Failed on a message: ' + err);
       }
     });
+    // A real submission sitting in spam would be deleted by Gmail after 30 days.
+    if (wasSpam && tookSomething) {
+      thread.moveToInbox();
+      rescued++;
+      console.log('Rescued from spam: ' + thread.getFirstMessageSubject());
+    }
     thread.addLabel(label);
     thread.moveToArchive();
   });
@@ -118,8 +134,67 @@ function processInbox() {
   rememberIds_(seen);
   if (threads.length) {
     console.log(threads.length + ' threads scanned, ' + added + ' rows added, ' +
-                skipped + ' already seen.');
+                skipped + ' already seen, ' + rescued + ' rescued from spam.');
   }
+}
+
+/**
+ * Sender addresses live in their own spreadsheet, which is never published.
+ * Keeping them out of the submissions file means that however that file is
+ * shared, no student address travels with it.
+ */
+function sendersSheet_() {
+  const props = PropertiesService.getScriptProperties();
+  let id = props.getProperty('SENDERS_SHEET_ID');
+  if (id) {
+    try {
+      return SpreadsheetApp.openById(id).getSheetByName('senders');
+    } catch (e) {
+      id = null;   // deleted or unreachable; make a fresh one below
+    }
+  }
+  const ss = SpreadsheetApp.create('Tough Tech Weekly senders (PRIVATE, do not publish)');
+  const sh = ss.getSheets()[0].setName('senders');
+  sh.getRange(1, 1, 1, 3).setValues([['timestamp', 'url', 'email']]).setFontWeight('bold');
+  sh.setFrozenRows(1);
+  props.setProperty('SENDERS_SHEET_ID', ss.getId());
+  console.log('Created the private senders sheet: ' + ss.getUrl());
+  return sh;
+}
+
+/**
+ * One-time cleanup. Moves every address already stored in the submissions
+ * spreadsheet into the private senders sheet, then wipes the column, header
+ * included, so the published CSV stops carrying student addresses.
+ */
+function scrubEmails() {
+  const sheet = getSheet_();
+  const last = sheet.getLastRow();
+  if (last < 2) {
+    console.log('No rows yet, nothing to scrub.');
+    return;
+  }
+
+  const stamps = sheet.getRange(2, 1, last - 1, 1).getValues();
+  const urls = sheet.getRange(2, 3, last - 1, 1).getValues();
+  const emailRange = sheet.getRange(2, 8, last - 1, 1);
+  const emails = emailRange.getValues();
+
+  const moved = [];
+  for (let i = 0; i < emails.length; i++) {
+    if (emails[i][0]) moved.push([stamps[i][0], urls[i][0], emails[i][0]]);
+  }
+
+  if (moved.length) {
+    const senders = sendersSheet_();
+    senders.getRange(senders.getLastRow() + 1, 1, moved.length, 3).setValues(moved);
+  }
+
+  emailRange.clearContent();
+  sheet.getRange(1, 8).clearContent();   // the "email" header too
+
+  console.log(moved.length + ' addresses moved to the private sheet and cleared here.');
+  console.log('The published CSV will stop showing them within a few minutes.');
 }
 
 function parseMessage_(msg) {
@@ -165,7 +240,7 @@ function parseMessage_(msg) {
     note,
     tag,
     status,
-    addr,      // private; the "queue" tab omits this column
+    addr,      // popped off in processInbox; never written to this file
   ];
 }
 

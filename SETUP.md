@@ -107,6 +107,37 @@ A message that was already looked at carries the `ttw-processed` label and gets
 skipped. Run **reprocess()** to move recent mail back to the inbox and clear that
 label, then **processInbox()** to try again.
 
+## Keeping student addresses out of the published file
+
+Sender addresses are stored in a separate spreadsheet, *Tough Tech Weekly senders
+(PRIVATE, do not publish)*, which the script creates on its own. The submissions
+file never receives them, so however that file gets shared, no student address
+travels with it.
+
+If you set this up before that change, run **scrubEmails()** once. It moves every
+address already sitting in the submissions sheet into the private file, then wipes
+the column and its header. The published CSV stops showing addresses within a few
+minutes.
+
+Never publish the senders spreadsheet.
+
+## Stopping Gmail filing submissions as spam
+
+Forwarded newsletters from an unfamiliar sender are exactly what Gmail's spam filter
+goes after, and a submission sitting in spam gets deleted after 30 days. The intake
+now reads spam as well, and lifts anything real back out of it, but it is better to
+stop it happening.
+
+In Gmail, as the newsletter account: **Settings ▸ See all settings ▸ Filters and
+Blocked Addresses ▸ Create a new filter**. In the *From* box put:
+
+```
+ucla.edu OR anderson.ucla.edu OR g.ucla.edu
+```
+
+Click **Create filter**, then tick **Never send it to Spam**, then **Create filter**
+again.
+
 ## What to tell students
 
 > Forward anything interesting in deep tech to **toughtechcapstone@gmail.com** from
