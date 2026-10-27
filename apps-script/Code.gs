@@ -13,7 +13,7 @@ const CONFIG = {
   TAB: 'inbox',
   ALLOWED_DOMAINS: ['anderson.ucla.edu', 'ucla.edu', 'g.ucla.edu'],
   PROCESSED_LABEL: 'ttw-processed',
-  MAX_THREADS: 50,
+  MAX_THREADS: 150,
   HEADERS: ['timestamp', 'name', 'url', 'title', 'note', 'tag', 'status', 'email'],
 };
 
@@ -88,10 +88,10 @@ function processInbox() {
   let label = GmailApp.getUserLabelByName(CONFIG.PROCESSED_LABEL);
   if (!label) label = GmailApp.createLabel(CONFIG.PROCESSED_LABEL);
 
-  // Deliberately no "-label:" filter here. Gmail groups a second forward of the
-  // same article into the existing thread, and excluding the thread would hide
-  // every later message in it. Dedupe happens per message id instead.
-  const threads = GmailApp.search('in:inbox newer_than:30d', 0, CONFIG.MAX_THREADS);
+  // in:anywhere, not in:inbox, so nothing can get permanently stranded: a reply
+  // into an already-archived thread, or a message Gmail filed as spam, is still
+  // seen. Re-scanning costs nothing because dedupe is per message id.
+  const threads = GmailApp.search('in:anywhere -in:trash newer_than:30d', 0, CONFIG.MAX_THREADS);
 
   const seen = seenIds_();
   const seenSet = {};
@@ -283,8 +283,8 @@ function diagnose() {
   console.log('');
 
   // in:anywhere so Spam and Trash show up too; plain search hides them.
-  const threads = GmailApp.search('newer_than:7d in:anywhere', 0, 25);
-  console.log(threads.length + ' threads in the last 7 days (including spam, trash and archived).');
+  const threads = GmailApp.search('newer_than:60d in:anywhere', 0, 60);
+  console.log(threads.length + ' threads in the last 60 days (including spam, trash and archived).');
   if (!threads.length) {
     console.log('Nothing arrived at all. Check the message was sent to this exact address.');
     return;
