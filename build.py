@@ -142,6 +142,93 @@ def clean_url(u):
                                     urllib.parse.urlencode(q), p.fragment))
 
 
+# --- notes: what a student typed, minus anything that should never be published.
+# Mirrors cleanNote_() in apps-script/Code.gs; keep the two in step.
+
+SALUTE = re.compile(
+    r"^\s*((?:hi|hello|hey|dear|professor|prof|good (?:morning|afternoon|evening))[^\n,]{0,30}),\s*", re.I)
+SIGNOFF_LINE = re.compile(
+    r"^(very respectfully|v/r|best regards|warm regards|warmest regards|kind regards|best wishes|"
+    r"all the best|many thanks|thank you|thanks so much|best|regards|thanks|cheers|sincerely|"
+    r"warmly|respectfully|gratefully)\b[\s,!.]*([A-Za-z][\w'’-]*\s*){0,3}[.!]?$", re.I)
+SIGNOFF_INLINE = re.compile(
+    r"\b(very respectfully|best regards|warm regards|kind regards|best wishes|many thanks|"
+    r"thank you|best|regards|thanks|cheers|sincerely|warmly|respectfully)\s*[,!]", re.I)
+SEPARATOR = re.compile(r"^[\s•·*_=~.\-–—]+$")
+SIG_CS = re.compile(r"\b(MBA|MD|JD|PhD)\b[\s/A-Z]{0,8}Candidate\b|\bClass of 20\d\d\b")
+SIG_CI = re.compile(
+    r"\b(cell|mobile|phone|tel)\s*:|\b(she|he|they)\s*/\s*(her|him|them)\b|\[cid:|"
+    r"\|\s*linkedin\b|\blinkedin\s*$", re.I)
+EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+PHONE_RE = re.compile(
+    r"(?:\+?1[\s.-]?)?\(?\b\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}\b|\+\d{1,3}(?:[\s.-]?\d{1,4}){3,5}")
+CID_RE = re.compile(r"\[cid:[^\]]*\]", re.I)
+
+
+def _looks_like_signature(p):
+    return bool(SIG_CS.search(p) or SIG_CI.search(p))
+
+
+def _name_line(p):
+    return 0 < len(p.split()) <= 4 and not re.search(r"[.!?]$|\d", p)
+
+
+def tidy_note(note):
+    """Strip the salutation, cut the signature block, and remove contact details.
+
+    A signature starts at the first later paragraph that is a sign-off ("Best,
+    Gladys"), a separator ("- - -"), or looks like a signature (a degree
+    candidacy, "Class of 2027", a "Cell:" label, pronouns, an inline image).
+    Email addresses and phone numbers are removed wherever they appear, as a
+    backstop for any signature shape not caught above.
+    """
+    n = (note or "").replace("\r", "")
+    looked_cut = bool(re.search(r"[(\[<]\s*$|\b\d+:\s*$", n))
+
+    m = SALUTE.match(n)
+    if m and len(m.group(1).split()) <= 3:
+        n = n[m.end():]
+
+    paras = [re.sub(r"\s+", " ", p).strip() for p in re.split(r"\n\s*\n", n)]
+    paras = [p for p in paras if p]
+    cut = len(paras)
+    for i in range(1, len(paras)):
+        p = paras[i]
+        bare = re.sub(r"\s+", " ", PHONE_RE.sub("", EMAIL_RE.sub("", CID_RE.sub("", p)))).strip()
+        if SIGNOFF_LINE.match(bare) or SEPARATOR.match(p):
+            cut = i
+            break
+        if _looks_like_signature(p):
+            inner = SIGNOFF_INLINE.search(p)
+            if inner and inner.start() > 0:
+                paras[i] = p[:inner.start()].strip()
+                cut = i + 1
+            else:
+                cut = i - 1 if i >= 2 and _name_line(paras[i - 1]) else i
+            break
+    if cut == len(paras) and paras and _looks_like_signature(paras[0]):
+        inner = SIGNOFF_INLINE.search(paras[0])
+        if inner and inner.start() > 0:
+            paras[0] = paras[0][:inner.start()].strip()
+
+    out = []
+    for p in paras[:cut]:
+        p = PHONE_RE.sub("", EMAIL_RE.sub("", CID_RE.sub("", p)))
+        p = re.sub(r"\s+", " ", p).strip()
+        if p:
+            out.append(p)
+    n = "\n\n".join(out)
+    n = re.sub(r"[\s(\[<]+$", "", n)
+    n = re.sub(r"\s*\b\d+:\s*$", "", n).strip()
+
+    # A note cut off where a link used to be, leaving only a fragment like
+    # "This article", says nothing. Show the attribution alone until the intake
+    # re-reads the original email.
+    if looked_cut and len(n) < 30:
+        return ""
+    return n
+
+
 def tidy_name(raw):
     """First name only. Handles directory-style "Wu, Jane" and stray punctuation."""
     n = (raw or "").replace('"', "").replace("'", "").strip()
@@ -208,7 +295,7 @@ def clean(rows, terms, do_fetch=True):
         if status in ("held", "removed", "hidden", "spam"):
             held += 1
             continue
-        note = row.get("note") or row.get("blurb") or row.get("context") or ""
+        note = tidy_note(row.get("note") or row.get("blurb") or row.get("context") or "")
         title = row.get("title") or ""
         hay = f"{url} {note} {title}".lower()
         if any(t in hay for t in terms):

@@ -83,6 +83,21 @@ function rememberIds_(ids) {
 }
 
 function processInbox() {
+  // The 5-minute trigger and a manual run must never overlap, or both append
+  // the same message and the sheet gets duplicate rows.
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) {
+    console.log('Another run is in progress; skipping this one.');
+    return;
+  }
+  try {
+    processInboxLocked_();
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function processInboxLocked_() {
   const sheet = getSheet_();
 
   let label = GmailApp.getUserLabelByName(CONFIG.PROCESSED_LABEL);
@@ -93,11 +108,21 @@ function processInbox() {
   // seen. Re-scanning costs nothing because dedupe is per message id.
   const threads = GmailApp.search('in:anywhere -in:trash newer_than:30d', 0, CONFIG.MAX_THREADS);
 
+  // Links already in the sheet. A message whose link is already there repairs
+  // that row's note when its own is fuller, rather than adding a duplicate.
+  const existing = {};
+  const last = sheet.getLastRow();
+  if (last >= 2) {
+    sheet.getRange(2, 3, last - 1, 3).getValues().forEach(function (v, i) {
+      existing[String(v[0])] = { row: i + 2, note: String(v[2] || '') };
+    });
+  }
+
   const seen = seenIds_();
   const seenSet = {};
   seen.forEach(function (id) { seenSet[id] = true; });
 
-  let added = 0, skipped = 0, rescued = 0;
+  let added = 0, repaired = 0, skipped = 0, rescued = 0;
   threads.forEach(function (thread) {
     const wasSpam = thread.isInSpam();
     let tookSomething = false;
@@ -110,9 +135,19 @@ function processInbox() {
           // The address is split off here and never written to the published
           // spreadsheet. It goes to a separate private file instead.
           const email = row.pop();
-          sheet.appendRow(row);
-          sendersSheet_().appendRow([row[0], row[2], email]);
-          added++;
+          const prior = existing[row[2]];
+          if (prior) {
+            if (row[4].length > prior.note.length) {
+              sheet.getRange(prior.row, 5).setValue(row[4]);
+              prior.note = row[4];
+              repaired++;
+            }
+          } else {
+            sheet.appendRow(row);
+            existing[row[2]] = { row: sheet.getLastRow(), note: row[4] };
+            sendersSheet_().appendRow([row[0], row[2], email]);
+            added++;
+          }
           tookSomething = true;
         }
         seen.push(id);
@@ -132,10 +167,9 @@ function processInbox() {
   });
 
   rememberIds_(seen);
-  if (threads.length) {
-    console.log(threads.length + ' threads scanned, ' + added + ' rows added, ' +
-                skipped + ' already seen, ' + rescued + ' rescued from spam.');
-  }
+  console.log(threads.length + ' threads scanned: ' + added + ' new rows, ' +
+              repaired + ' notes repaired, ' + rescued + ' rescued from spam, ' +
+              skipped + ' already seen.');
 }
 
 /**
@@ -175,26 +209,47 @@ function scrubEmails() {
     return;
   }
 
-  const stamps = sheet.getRange(2, 1, last - 1, 1).getValues();
-  const urls = sheet.getRange(2, 3, last - 1, 1).getValues();
-  const emailRange = sheet.getRange(2, 8, last - 1, 1);
-  const emails = emailRange.getValues();
-
+  // 1. Move any sender addresses in column H to the private file, then clear it.
+  const width = Math.max(sheet.getLastColumn(), 8);
+  const data = sheet.getRange(2, 1, last - 1, width).getValues();
   const moved = [];
-  for (let i = 0; i < emails.length; i++) {
-    if (emails[i][0]) moved.push([stamps[i][0], urls[i][0], emails[i][0]]);
-  }
-
+  data.forEach(function (r) {
+    if (r[7]) moved.push([r[0], r[2], r[7]]);
+  });
   if (moved.length) {
     const senders = sendersSheet_();
     senders.getRange(senders.getLastRow() + 1, 1, moved.length, 3).setValues(moved);
   }
+  sheet.getRange(2, 8, last - 1, 1).clearContent();
+  sheet.getRange(1, 8).clearContent();
 
-  emailRange.clearContent();
-  sheet.getRange(1, 8).clearContent();   // the "email" header too
+  // 2. Clean every published note: salutations, signatures, addresses, phone numbers.
+  const noteRange = sheet.getRange(2, 5, last - 1, 1);
+  const notes = noteRange.getValues();
+  let cleaned = 0;
+  const fixed = notes.map(function (r) {
+    const before = String(r[0] || '');
+    const after = cleanNote_(before);
+    if (after !== before) cleaned++;
+    return [after];
+  });
+  noteRange.setValues(fixed);
 
-  console.log(moved.length + ' addresses moved to the private sheet and cleared here.');
-  console.log('The published CSV will stop showing them within a few minutes.');
+  console.log(moved.length + ' sender addresses moved to the private sheet and cleared here.');
+  console.log(cleaned + ' notes cleaned of salutations, signatures and contact details.');
+}
+
+/**
+ * The one button. Cleans the sheet, then re-reads the last 30 days of mail,
+ * including spam, so stranded submissions come in and cut-off notes get repaired
+ * in place. Safe to run more than once.
+ */
+function runAllFixes() {
+  scrubEmails();
+  reprocess();
+  processInbox();
+  console.log('');
+  console.log('All done. The site rebuilds within 3 hours, or sooner if Claude triggers it.');
 }
 
 function parseMessage_(msg) {
@@ -324,20 +379,80 @@ function extractNote_(body, url) {
     if (text) paragraphs.push(text);
   });
 
-  let note = paragraphs.join('\n\n');
+  return cleanNote_(paragraphs.join('\n\n')).slice(0, 4000);
+}
 
-  // Drop a leading salutation so notes start with the substance. Only when the
-  // part before the comma is three words or fewer, so a sentence that happens to
-  // open with "Professor Wu argues that X, ..." keeps its text.
-  note = note.replace(
-    /^((?:hi|hello|hey|dear|professor|prof|good (?:morning|afternoon|evening))[^\n,]{0,30}),\s*/i,
-    function (match, head) {
-      return head.trim().split(/\s+/).length <= 3 ? '' : match;
-    });
-  // Drop a trailing sign-off and whatever name follows it.
-  note = note.replace(/\n*\s*(best|thanks|thank you|cheers|regards|best regards|sincerely)[,!]?\s*[A-Za-z .'-]{0,40}\s*$/i, '');
+// --- notes: what a student typed, minus anything that should never be published.
+// Shared by intake and scrubEmails(), so old rows get the same treatment as new
+// ones. Mirrors tidy_note() in build.py; keep the two in step.
+const SALUTE_ = /^\s*((?:hi|hello|hey|dear|professor|prof|good (?:morning|afternoon|evening))[^\n,]{0,30}),\s*/i;
+const SIGNOFF_LINE_ = /^(very respectfully|v\/r|best regards|warm regards|warmest regards|kind regards|best wishes|all the best|many thanks|thank you|thanks so much|best|regards|thanks|cheers|sincerely|warmly|respectfully|gratefully)\b[\s,!.]*([A-Za-z][\w'’-]*\s*){0,3}[.!]?$/i;
+const SIGNOFF_INLINE_ = /\b(very respectfully|best regards|warm regards|kind regards|best wishes|many thanks|thank you|best|regards|thanks|cheers|sincerely|warmly|respectfully)\s*[,!]/i;
+const SEPARATOR_ = /^[\s•·*_=~.\-–—]+$/;
+const SIG_CS_ = /\b(MBA|MD|JD|PhD)\b[\s\/A-Z]{0,8}Candidate\b|\bClass of 20\d\d\b/;
+const SIG_CI_ = /\b(cell|mobile|phone|tel)\s*:|\b(she|he|they)\s*\/\s*(her|him|them)\b|\[cid:|\|\s*linkedin\b|\blinkedin\s*$/i;
+const EMAIL_RE_ = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
+const PHONE_RE_ = /(?:\+?1[\s.-]?)?\(?\b\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}\b|\+\d{1,3}(?:[\s.-]?\d{1,4}){3,5}/g;
+const CID_RE_ = /\[cid:[^\]]*\]/gi;
 
-  return note.trim().slice(0, 4000);
+function looksLikeSignature_(p) {
+  return SIG_CS_.test(p) || SIG_CI_.test(p);
+}
+
+function nameLine_(p) {
+  const words = p.split(/\s+/).filter(Boolean).length;
+  return words > 0 && words <= 4 && !/[.!?]$|\d/.test(p);
+}
+
+/**
+ * Strip the salutation, cut the signature block, and remove contact details.
+ *
+ * A signature starts at the first later paragraph that is a sign-off ("Best,
+ * Gladys", "Very Respectfully,"), a separator ("• • •"), or looks like a
+ * signature (a degree candidacy, "Class of 2027", a "Cell:" label, pronouns, an
+ * inline image). Email addresses and phone numbers are removed wherever they
+ * appear, as a backstop for any signature shape not caught above.
+ */
+function cleanNote_(note) {
+  let n = String(note || '').replace(/\r/g, '');
+
+  const m = n.match(SALUTE_);
+  if (m && m[1].trim().split(/\s+/).length <= 3) n = n.slice(m[0].length);
+
+  const paras = n.split(/\n\s*\n/)
+                 .map(function (p) { return p.replace(/\s+/g, ' ').trim(); })
+                 .filter(Boolean);
+  let cut = paras.length;
+  for (let i = 1; i < paras.length; i++) {
+    const p = paras[i];
+    const bare = p.replace(CID_RE_, '').replace(EMAIL_RE_, '').replace(PHONE_RE_, '')
+                  .replace(/\s+/g, ' ').trim();
+    if (SIGNOFF_LINE_.test(bare) || SEPARATOR_.test(p)) { cut = i; break; }
+    if (looksLikeSignature_(p)) {
+      const inner = p.search(SIGNOFF_INLINE_);
+      if (inner > 0) {
+        paras[i] = p.slice(0, inner).trim();
+        cut = i + 1;
+      } else {
+        cut = (i >= 2 && nameLine_(paras[i - 1])) ? i - 1 : i;
+      }
+      break;
+    }
+  }
+  if (cut === paras.length && paras.length && looksLikeSignature_(paras[0])) {
+    const inner = paras[0].search(SIGNOFF_INLINE_);
+    if (inner > 0) paras[0] = paras[0].slice(0, inner).trim();
+  }
+
+  const out = [];
+  paras.slice(0, cut).forEach(function (p) {
+    p = p.replace(CID_RE_, '').replace(EMAIL_RE_, '').replace(PHONE_RE_, '');
+    p = p.replace(/\s+/g, ' ').trim();
+    if (p) out.push(p);
+  });
+  n = out.join('\n\n');
+  n = n.replace(/[\s(\[<]+$/, '').replace(/\s*\b\d+:\s*$/, '');
+  return n.trim();
 }
 
 /**
