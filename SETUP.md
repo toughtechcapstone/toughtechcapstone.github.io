@@ -114,10 +114,11 @@ Sender addresses are stored in a separate spreadsheet, *Tough Tech Weekly sender
 file never receives them, so however that file gets shared, no student address
 travels with it.
 
-If you set this up before that change, run **scrubEmails()** once. It moves every
-address already sitting in the submissions sheet into the private file, then wipes
-the column and its header. The published CSV stops showing addresses within a few
-minutes.
+If you set this up before that change, run **runAllFixes()** once. It moves every
+address already sitting in the submissions sheet into the private file, wipes that
+column, strips signatures, phone numbers and salutations out of every existing note,
+then re-reads the last 30 days of mail (spam included) to bring in anything that was
+missed and repair any note that was cut off. Safe to run more than once.
 
 Never publish the senders spreadsheet.
 
